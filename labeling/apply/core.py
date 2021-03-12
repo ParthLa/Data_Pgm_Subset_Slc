@@ -8,7 +8,7 @@ from labeling.lf import LabelingFunction
 from labeling.types import DataPoint, DataPoints
 from labeling.utils.data_operators import check_unique_names
 
-RowData = List[Tuple[int, int, int]]
+RowData = List[Tuple[int, int, int, float]]     # index of datapoint, index of lf, label, confidence
 
 
 class ApplierMetadata(NamedTuple):
@@ -23,7 +23,7 @@ class _FunctionCaller:
         self.fault_tolerant = fault_tolerant
         self.fault_counts: DefaultDict[str, int] = DefaultDict(int)
 
-    def __call__(self, f: LabelingFunction, x: DataPoint) -> int:
+    def __call__(self, f: LabelingFunction, x: DataPoint) -> (int, float):
         if not self.fault_tolerant:
             return f(x)
         try:
@@ -58,12 +58,14 @@ class BaseLFApplier:
 
     def _numpy_from_row_data(self, labels: List[RowData]) -> np.ndarray:
         L = np.zeros((len(labels), len(self._lfs)), dtype=int) - 1
+        S = np.zeros((len(labels), len(self._lfs)), dtype=float) - 1.0
         # NB: this check will short-circuit, so ok for large L
         if any(map(len, labels)):
-            row, col, data = zip(*chain.from_iterable(labels))
-            L[row, col] = data
+            row, col, lab, conf = zip(*chain.from_iterable(labels))
+            L[row, col] = lab
+            S[row, col] = conf
 
-        if self._use_recarray:
+        if self._use_recarray:                                        # always false
             n_rows, _ = L.shape
             dtype = [(name, np.int64) for name in self._lf_names]
             recarray = np.recarray(n_rows, dtype=dtype)
@@ -72,7 +74,7 @@ class BaseLFApplier:
 
             return recarray
         else:
-            return L
+            return L,S
 
     def __repr__(self) -> str:
         return f"{type(self).__name__}, LFs: {self._lf_names}"
@@ -99,9 +101,9 @@ def apply_lfs_to_data_point(
     """
     labels = []
     for j, lf in enumerate(lfs):
-        y = f_caller(lf, x)
+        y, z = f_caller(lf, x)
         if y >= 0:
-            labels.append((index, j, y))
+            labels.append((index, j, y, z))
     return labels
 
 
@@ -158,7 +160,7 @@ class LFApplier(BaseLFApplier):
         f_caller = _FunctionCaller(fault_tolerant)
         for i, x in tqdm(enumerate(data_points), disable=(not progress_bar)):
             labels.append(apply_lfs_to_data_point(x, i, self._lfs, f_caller))
-        L = self._numpy_from_row_data(labels)
+        L,S = self._numpy_from_row_data(labels)
         if return_meta:
             return L, ApplierMetadata(f_caller.fault_counts)
-        return L
+        return L,S
