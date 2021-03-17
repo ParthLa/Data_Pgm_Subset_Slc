@@ -17,7 +17,7 @@ lf_resources={"r3":4, "len2":5}
 def score(x, **kwargs):
     t1=np.exp(-1*np.linalg.norm(x['value']))
     t2=(kwargs["r1"]+kwargs["r2"])/(kwargs["len1"]*kwargs["len1"])
-    t3=kwargs["r3"]/kwargs["len2"]
+    t3=kwargs["r2"]/kwargs["len2"]
     return t1*t2*t3
 
 @labeling_function(pre=[square], resources=lf_resources, cont_scorer=score)
