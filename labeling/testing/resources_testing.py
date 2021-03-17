@@ -17,7 +17,7 @@ lf_resources={"r3":4, "len2":5}
 def score(x, **kwargs):
     t1=np.exp(-1*np.linalg.norm(x['value']))
     t2=(kwargs["r1"]+kwargs["r2"])/(kwargs["len1"]*kwargs["len1"])
-    t3=kwargs["r2"]/kwargs["len2"]
+    t3=kwargs["r3"]/kwargs["len2"]
     return t1*t2*t3
 
 @labeling_function(pre=[square], resources=lf_resources, cont_scorer=score)
@@ -33,14 +33,13 @@ def lf2(x):
     return -1
 
 lfs = [lf1, lf2]
-data = np.array([[0.74245789, 0.42154025, 0.30051336, 0.35684219],
-[0.0303558,  0.74972649, 0.99098186, 0.56246529]])
+data = np.array([[0.14912444, 0.83544616, 0.61849807, 0.43523642],
+[0.14795163, 0.9986555,  0.27234144, 0.87403315]])
 
 applier = LFApplier(lfs=lfs)
 L,S=applier.apply(data)
-
-Lc=np.array([[0,  1], [-1, -1]])
-Sc=np.array([[ 0.65867513, -1.],[-1.,-1.]])
+Lc=np.array([[0,  1],[-1, -1]])
+Sc=np.array([[0.2646661, -1.],[-1.,-1.]])
 
 if (np.allclose(S,Sc) and np.allclose(L,Lc)):
     print("works fine")
