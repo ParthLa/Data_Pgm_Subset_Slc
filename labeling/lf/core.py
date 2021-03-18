@@ -28,7 +28,7 @@ class LabelingFunction:
         x = self._preprocess_data_point(x)
         if self._cont_scorer is None:
             return self._f(x,**self._resources), -1.0            
-        return self._f(x,**self._resources), self._cont_scorer(x) 
+        return self._f(x,**self._resources), self._cont_scorer(x,**self._resources) 
 
     def __repr__(self) -> str:
         preprocessor_str = f", Preprocessors: {self._pre}"

@@ -38,15 +38,14 @@ def preprocess(tokens):
     return btw_words
 
 
-trigWord1 = {"free","credit","cheap","apply","buy","attention","shop","sex","soon","now","spam"}
-
-@continuous_scorer(resources=dict(keywords=trigWord1))
-def word_similarity(sentence,keywords):
+@continuous_scorer()
+def word_similarity(sentence,**kwargs):
     similarity = 0
     words = sentence.split()
     words = preprocess(words)
     word_vectors = get_word_vectors(words)
-    for w in keywords:
+    for w in kwargs['keywords']:
         similarity = max(similarity,get_similarity(word_vectors,w))
+
     return similarity
 

@@ -84,9 +84,34 @@ def LF8(c):
 def LF9(c):
     return HAM
 
-@labeling_function(cont_scorer=word_similarity)
-def CLF1(c):
+@labeling_function(cont_scorer=word_similarity,resources=dict(keywords=trigWord1))
+def CLF1(c,keywords):
     return SPAM
+
+@labeling_function(cont_scorer=word_similarity,resources=dict(keywords=trigWord2))
+def CLF2(c,keywords):
+    return SPAM
+
+@labeling_function(cont_scorer=word_similarity,resources=dict(keywords=trigWord3))
+def CLF3(c,keywords):
+    return SPAM
+
+@labeling_function(cont_scorer=word_similarity,resources=dict(keywords=notFreeWords))
+def CLF4(c,keywords):
+    return HAM
+
+@labeling_function(cont_scorer=word_similarity,resources=dict(keywords=notFreeSubstring))
+def CLF5(c,keywords):
+    return HAM
+
+@labeling_function(cont_scorer=word_similarity,resources=dict(keywords=firstAndSecondPersonWords))
+def CLF6(c,keywords):
+    return HAM
+
+@labeling_function(cont_scorer=word_similarity,resources=dict(keywords=thirdPersonWords))
+def CLF7(c,keywords):
+    return HAM
+
 
 LFS = [LF1,
     LF2,
@@ -97,4 +122,10 @@ LFS = [LF1,
     LF7,
     LF8,
     LF9,
-    CLF1]
+    CLF1,
+    CLF2,
+    CLF3,
+    CLF4,
+    CLF5,
+    CLF6,
+    CLF7]
