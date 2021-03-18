@@ -24,7 +24,7 @@ class LabelingFunction:
                 raise ValueError("Preprocessor should not return None")
         return x
 
-    def __call__(self, x: DataPoint) -> int:
+    def __call__(self, x: DataPoint) -> (int, float):
         x = self._preprocess_data_point(x)
         if self._cont_scorer is None:
             return self._f(x,**self._resources), -1.0            
