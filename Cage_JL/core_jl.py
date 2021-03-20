@@ -173,155 +173,142 @@ class Joint_Learning:
 		elif self.feature_model =='nn':
 			self.lr_model = DeepNet(n_features, self.n_hidden, self.n_classes)
 
-		def fit():
-			'''
-			'''
-			final_score_gm, final_score_lr, final_score_gm_val, final_score_lr_val = [],[],[],[]
-			final_score_lr_prec, final_score_lr_recall, final_score_gm_prec, final_score_gm_recall = [],[],[],[]
-			for lo in range(0,self.n_runs):
-				self.pi = torch.ones((self.n_classes, self.n_lfs)).double()
-				(self.pi).requires_grad = True
+	def fit():
+		'''
+		'''
+		final_score_gm, final_score_lr, final_score_gm_val, final_score_lr_val = [],[],[],[]
+		final_score_lr_prec, final_score_lr_recall, final_score_gm_prec, final_score_gm_recall = [],[],[],[]
+		for lo in range(0,self.n_runs):
+			self.pi = torch.ones((self.n_classes, self.n_lfs)).double()
+			(self.pi).requires_grad = True
 
-				self.theta = torch.ones((self.n_classes, self.n_lfs)).double() * 1
-				(self.theta).requires_grad = True
+			self.theta = torch.ones((self.n_classes, self.n_lfs)).double() * 1
+			(self.theta).requires_grad = True
 
-				self.pi_y = torch.ones(self.n_classes).double()
-				(self.pi_y).requires_grad = True
-				
-				optimizer = torch.optim.Adam([{"params": self.lr_model.parameters()}, {"params": [self.pi, self.pi_y, self.theta]}], lr=0.001)
-				optimizer_lr = torch.optim.Adam(self.lr_model.parameters(), lr = self.lr_feature)
-				optimizer_gm = torch.optim.Adam([self.theta, self.pi, self.pi_y], lr = self.lr_gm, weight_decay=0)
-				supervised_criterion = torch.nn.CrossEntropyLoss()
+			self.pi_y = torch.ones(self.n_classes).double()
+			(self.pi_y).requires_grad = True
+			
+			optimizer = torch.optim.Adam([{"params": self.lr_model.parameters()}, {"params": [self.pi, self.pi_y, self.theta]}], lr=0.001)
+			optimizer_lr = torch.optim.Adam(self.lr_model.parameters(), lr = self.lr_feature)
+			optimizer_gm = torch.optim.Adam([self.theta, self.pi, self.pi_y], lr = self.lr_gm, weight_decay=0)
+			supervised_criterion = torch.nn.CrossEntropyLoss()
 
-				dataset = TensorDataset(self.x_train, self.y_train, self.l, self.s, self.supervised_mask)
+			dataset = TensorDataset(self.x_train, self.y_train, self.l, self.s, self.supervised_mask)
 
-				loader = DataLoader(dataset, batch_size = self.batch_size, shuffle = True, pin_memory = True)
+			loader = DataLoader(dataset, batch_size = self.batch_size, shuffle = True, pin_memory = True)
 
-				best_score_lr,best_score_gm,best_epoch_lr,best_epoch_gm,best_score_lr_val, best_score_gm_val = 0,0,0,0,0,0
-				best_score_lr_prec,best_score_lr_recall ,best_score_gm_prec,best_score_gm_recall= 0,0,0,0
+			best_score_lr,best_score_gm,best_epoch_lr,best_epoch_gm,best_score_lr_val, best_score_gm_val = 0,0,0,0,0,0
+			best_score_lr_prec,best_score_lr_recall ,best_score_gm_prec,best_score_gm_recall= 0,0,0,0
 
-				stop_early, stop_early_gm = [], []
+			stop_early, stop_early_gm = [], []
 
-				for epoch in range(self.n_epochs):
-					self.lr_model.train()
+			for epoch in range(self.n_epochs):
+				self.lr_model.train()
 
-					for batch_ndx, sample in enumerate(loader):
-						optimizer_lr.zero_grad()
-						optimizer_gm.zero_grad()
+				for batch_ndx, sample in enumerate(loader):
+					optimizer_lr.zero_grad()
+					optimizer_gm.zero_grad()
 
-						unsup = []
-						sup = []
-						supervised_indices = sample[4].nonzero().view(-1)
-						# unsupervised_indices = indices  ## Uncomment for entropy
-						unsupervised_indices = (1-sample[4]).nonzero().squeeze()
+					unsup = []
+					sup = []
+					supervised_indices = sample[4].nonzero().view(-1)
+					# unsupervised_indices = indices  ## Uncomment for entropy
+					unsupervised_indices = (1-sample[4]).nonzero().squeeze()
 
 
-						if(self.loss_func_mask[0]):
-							if len(supervised_indices) > 0:
-								loss_1 = supervised_criterion(self.lr_model(sample[0][supervised_indices]), sample[1][supervised_indices])
-							else:
-								loss_1 = 0
+					if(self.loss_func_mask[0]):
+						if len(supervised_indices) > 0:
+							loss_1 = supervised_criterion(self.lr_model(sample[0][supervised_indices]), sample[1][supervised_indices])
 						else:
-							loss_1=0
-
-						if(self.loss_func_mask[1]):
-							unsupervised_lr_probability = torch.nn.Softmax()(self.lr_model(sample[0][unsupervised_indices]))
-							loss_2 = entropy(unsupervised_lr_probability)
-						else:
-							loss_2=0
-
-						if(self.loss_func_mask[2]):
-							y_pred_unsupervised = pred_gm(self.theta, self.pi_y, self.pi, sample[2][unsupervised_indices], sample[3][unsupervised_indices], self.k, self.n_classes, self.continuous_mask, self.qc)
-							loss_3 = supervised_criterion(self.lr_model(sample[0][unsupervised_indices]), torch.tensor(y_pred_unsupervised))
-						else:
-							loss_3 = 0
-
-						if (self.loss_func_mask[3] and len(supervised_indices) > 0):
-							loss_4 = log_likelihood_loss_supervised(self.theta, self.pi_y, self.pi, sample[1][supervised_indices], sample[2][supervised_indices], sample[3][supervised_indices], self.k, self.n_classes, self.continuous_mask, self.qc)
-						else:
-							loss_4 = 0
-
-						if(self.loss_func_mask[4]):
-							loss_5 = log_likelihood_loss(self.theta, self.pi_y, self.pi, sample[2][unsupervised_indices], sample[3][unsupervised_indices], self.k, self.n_classes, self.continuous_mask, self.qc)
-						else:
-							loss_5 =0
-
-						if(self.loss_func_mask[5]):
-							if(len(supervised_indices) >0):
-								supervised_indices = supervised_indices.tolist()
-								probs_graphical = probability(self.theta, self.pi_y, self.pi, torch.cat([sample[2][unsupervised_indices], sample[2][supervised_indices]]),\
-								torch.cat([sample[3][unsupervised_indices],sample[3][supervised_indices]]), self.k, self.n_classes, self.continuous_mask, self.qc)
-							else:
-								probs_graphical = probability(self.theta, self.pi_y, self.pi,sample[2][unsupervised_indices],sample[3][unsupervised_indices],\
-									self.k, self.n_classes, self.continuous_mask, self.qc)
-							probs_graphical = (probs_graphical.t() / probs_graphical.sum(1)).t()
-							probs_lr = torch.nn.Softmax()(self.lr_model(sample[0]))
-							#loss_6 = kl_divergence(probs_lr, probs_graphical) # todo: include experiment?
-							loss_6 = kl_divergence(probs_graphical, probs_lr) #original version
-						else:
-							loss_6= 0
-
-						if(self.loss_func_mask[6]):
-							prec_loss = precision_loss(self.theta, self.k, self.n_classes, self.qt)
-						else:
-							prec_loss =0
-
-						loss = loss_1 + loss_2 + loss_3 + loss_4 + loss_6+loss_5 + prec_loss
-						if loss != 0:
-							loss.backward()
-							optimizer_gm.step()
-							optimizer_lr.step()
-
-					#gm Test
-					y_pred = pred_gm(self.theta, self.pi_y, self.pi, self.l_test, self.s_test, self.k, self.n_classes, self.continuous_mask, self.qc)
-					if self.use_accuracy_score:
-						gm_acc = score(self.y_test, y_pred)
+							loss_1 = 0
 					else:
-						gm_acc = score(self.y_test, y_pred, average = self.metric_avg)
-						gm_prec = prec_score(self.y_test, y_pred, average = self.metric_avg)
-						gm_recall = recall_score(self.y_test, y_pred, average = self.metric_avg)
+						loss_1=0
 
-					#gm Validation
-					y_pred = pred_gm(self.theta, self.pi_y, self.pi, self.l_valid, self.s_valid, self.k, self.n_classes, self.continuous_mask, self.qc)
-					if self.use_accuracy_score:
-						gm_valid_acc = score(self.y_valid, y_pred)
+					if(self.loss_func_mask[1]):
+						unsupervised_lr_probability = torch.nn.Softmax()(self.lr_model(sample[0][unsupervised_indices]))
+						loss_2 = entropy(unsupervised_lr_probability)
 					else:
-						gm_valid_acc = score(self.y_valid, y_pred, average = self.metric_avg)
+						loss_2=0
 
-					#LR Test
-					probs = torch.nn.Softmax()(self.lr_model(self.x_test))
-					y_pred = np.argmax(probs.detach().numpy(), 1)
-					if self.use_accuracy_score:
-						lr_acc =score(self.y_test, y_pred)
+					if(self.loss_func_mask[2]):
+						y_pred_unsupervised = pred_gm(self.theta, self.pi_y, self.pi, sample[2][unsupervised_indices], sample[3][unsupervised_indices], self.k, self.n_classes, self.continuous_mask, self.qc)
+						loss_3 = supervised_criterion(self.lr_model(sample[0][unsupervised_indices]), torch.tensor(y_pred_unsupervised))
 					else:
-						lr_acc =score(self.y_test, y_pred, average = self.metric_avg)
-						lr_prec = prec_score(self.y_test, y_pred, average = self.metric_avg)
-						lr_recall = recall_score(self.y_test, y_pred, average = self.metric_avg)
+						loss_3 = 0
 
-					#LR Validation
-					probs = torch.nn.Softmax()(self.lr_model(self.x_valid))
-					y_pred = np.argmax(probs.detach().numpy(), 1)
-					if self.use_accuracy_score:
-						lr_valid_acc = score(self.y_valid, y_pred)
+					if (self.loss_func_mask[3] and len(supervised_indices) > 0):
+						loss_4 = log_likelihood_loss_supervised(self.theta, self.pi_y, self.pi, sample[1][supervised_indices], sample[2][supervised_indices], sample[3][supervised_indices], self.k, self.n_classes, self.continuous_mask, self.qc)
 					else:
-						lr_valid_acc = score(self.y_valid, y_pred, average = self.metric_avg)
+						loss_4 = 0
 
-					if epoch > 5 and gm_valid_acc >= best_score_gm_val and gm_valid_acc >= best_score_lr_val:
-						if gm_valid_acc == best_score_gm_val or gm_valid_acc == best_score_lr_val:
-							if best_score_gm < gm_acc or best_score_lr < lr_acc:
-								best_epoch_lr = epoch
-								best_score_lr_val = lr_valid_acc
-								best_score_lr = lr_acc
+					if(self.loss_func_mask[4]):
+						loss_5 = log_likelihood_loss(self.theta, self.pi_y, self.pi, sample[2][unsupervised_indices], sample[3][unsupervised_indices], self.k, self.n_classes, self.continuous_mask, self.qc)
+					else:
+						loss_5 =0
 
-								best_epoch_gm = epoch
-								best_score_gm_val = gm_valid_acc
-								best_score_gm = gm_acc
-
-								best_score_lr_prec = lr_prec
-								best_score_lr_recall  = lr_recall
-								best_score_gm_prec = gm_prec
-								best_score_gm_recall  = gm_recall
+					if(self.loss_func_mask[5]):
+						if(len(supervised_indices) >0):
+							supervised_indices = supervised_indices.tolist()
+							probs_graphical = probability(self.theta, self.pi_y, self.pi, torch.cat([sample[2][unsupervised_indices], sample[2][supervised_indices]]),\
+							torch.cat([sample[3][unsupervised_indices],sample[3][supervised_indices]]), self.k, self.n_classes, self.continuous_mask, self.qc)
 						else:
+							probs_graphical = probability(self.theta, self.pi_y, self.pi,sample[2][unsupervised_indices],sample[3][unsupervised_indices],\
+								self.k, self.n_classes, self.continuous_mask, self.qc)
+						probs_graphical = (probs_graphical.t() / probs_graphical.sum(1)).t()
+						probs_lr = torch.nn.Softmax()(self.lr_model(sample[0]))
+						#loss_6 = kl_divergence(probs_lr, probs_graphical) # todo: include experiment?
+						loss_6 = kl_divergence(probs_graphical, probs_lr) #original version
+					else:
+						loss_6= 0
+
+					if(self.loss_func_mask[6]):
+						prec_loss = precision_loss(self.theta, self.k, self.n_classes, self.qt)
+					else:
+						prec_loss =0
+
+					loss = loss_1 + loss_2 + loss_3 + loss_4 + loss_6+loss_5 + prec_loss
+					if loss != 0:
+						loss.backward()
+						optimizer_gm.step()
+						optimizer_lr.step()
+
+				#gm Test
+				y_pred = pred_gm(self.theta, self.pi_y, self.pi, self.l_test, self.s_test, self.k, self.n_classes, self.continuous_mask, self.qc)
+				if self.use_accuracy_score:
+					gm_acc = score(self.y_test, y_pred)
+				else:
+					gm_acc = score(self.y_test, y_pred, average = self.metric_avg)
+					gm_prec = prec_score(self.y_test, y_pred, average = self.metric_avg)
+					gm_recall = recall_score(self.y_test, y_pred, average = self.metric_avg)
+
+				#gm Validation
+				y_pred = pred_gm(self.theta, self.pi_y, self.pi, self.l_valid, self.s_valid, self.k, self.n_classes, self.continuous_mask, self.qc)
+				if self.use_accuracy_score:
+					gm_valid_acc = score(self.y_valid, y_pred)
+				else:
+					gm_valid_acc = score(self.y_valid, y_pred, average = self.metric_avg)
+
+				#LR Test
+				probs = torch.nn.Softmax()(self.lr_model(self.x_test))
+				y_pred = np.argmax(probs.detach().numpy(), 1)
+				if self.use_accuracy_score:
+					lr_acc =score(self.y_test, y_pred)
+				else:
+					lr_acc =score(self.y_test, y_pred, average = self.metric_avg)
+					lr_prec = prec_score(self.y_test, y_pred, average = self.metric_avg)
+					lr_recall = recall_score(self.y_test, y_pred, average = self.metric_avg)
+
+				#LR Validation
+				probs = torch.nn.Softmax()(self.lr_model(self.x_valid))
+				y_pred = np.argmax(probs.detach().numpy(), 1)
+				if self.use_accuracy_score:
+					lr_valid_acc = score(self.y_valid, y_pred)
+				else:
+					lr_valid_acc = score(self.y_valid, y_pred, average = self.metric_avg)
+
+				if epoch > 5 and gm_valid_acc >= best_score_gm_val and gm_valid_acc >= best_score_lr_val:
+					if gm_valid_acc == best_score_gm_val or gm_valid_acc == best_score_lr_val:
+						if best_score_gm < gm_acc or best_score_lr < lr_acc:
 							best_epoch_lr = epoch
 							best_score_lr_val = lr_valid_acc
 							best_score_lr = lr_acc
@@ -334,85 +321,98 @@ class Joint_Learning:
 							best_score_lr_recall  = lr_recall
 							best_score_gm_prec = gm_prec
 							best_score_gm_recall  = gm_recall
-							stop_early = []
-							stop_early_gm = []
-						#checkpoint = {'theta': theta,'pi': pi}
-						# torch.save(checkpoint, save_folder+"/gm_"+str(epoch)    +".pt")
-						#checkpoint = {'params': self.lr_model.state_dict()}
-						# torch.save(checkpoint, save_folder+"/lr_"+ str(epoch)+".pt")
-						
+					else:
+						best_epoch_lr = epoch
+						best_score_lr_val = lr_valid_acc
+						best_score_lr = lr_acc
 
-					if epoch > 5 and lr_valid_acc >= best_score_lr_val and lr_valid_acc >= best_score_gm_val:
-						if lr_valid_acc == best_score_lr_val or lr_valid_acc == best_score_gm_val:
-							if best_score_lr < lr_acc or best_score_gm < gm_acc:
-								
-								best_epoch_lr = epoch
-								best_score_lr_val = lr_valid_acc
-								best_score_lr = lr_acc
+						best_epoch_gm = epoch
+						best_score_gm_val = gm_valid_acc
+						best_score_gm = gm_acc
 
-								best_epoch_gm = epoch
-								best_score_gm_val = gm_valid_acc
-								best_score_gm = gm_acc
+						best_score_lr_prec = lr_prec
+						best_score_lr_recall  = lr_recall
+						best_score_gm_prec = gm_prec
+						best_score_gm_recall  = gm_recall
+						stop_early = []
+						stop_early_gm = []
+					#checkpoint = {'theta': theta,'pi': pi}
+					# torch.save(checkpoint, save_folder+"/gm_"+str(epoch)    +".pt")
+					#checkpoint = {'params': self.lr_model.state_dict()}
+					# torch.save(checkpoint, save_folder+"/lr_"+ str(epoch)+".pt")
+					
 
-								best_score_lr_prec = lr_prec
-								best_score_lr_recall  = lr_recall
-								best_score_gm_prec = gm_prec
-								best_score_gm_recall  = gm_recall
-						else:
+				if epoch > 5 and lr_valid_acc >= best_score_lr_val and lr_valid_acc >= best_score_gm_val:
+					if lr_valid_acc == best_score_lr_val or lr_valid_acc == best_score_gm_val:
+						if best_score_lr < lr_acc or best_score_gm < gm_acc:
+							
 							best_epoch_lr = epoch
 							best_score_lr_val = lr_valid_acc
 							best_score_lr = lr_acc
+
 							best_epoch_gm = epoch
 							best_score_gm_val = gm_valid_acc
 							best_score_gm = gm_acc
+
 							best_score_lr_prec = lr_prec
 							best_score_lr_recall  = lr_recall
 							best_score_gm_prec = gm_prec
 							best_score_gm_recall  = gm_recall
-							stop_early = []
-							stop_early_gm = []
-						#checkpoint = {'theta': theta,'pi': pi}
-						# torch.save(checkpoint, save_folder+"/gm_"+str(epoch)    +".pt")
-						#checkpoint = {'params': self.lr_model.state_dict()}
-						# torch.save(checkpoint, save_folder+"/lr_"+ str(epoch)+".pt")
-
-
-					if len(stop_early) > 10 and len(stop_early_gm) > 10 and (all(best_score_lr_val >= k for k in stop_early) or \
-					all(best_score_gm_val >= k for k in stop_early_gm)):
-						print('Early Stopping at', best_epoch_gm, best_score_gm, best_score_lr)
-						print('Validation score Early Stopping at', best_epoch_gm, best_score_lr_val, best_score_gm_val)
-						break
 					else:
-						stop_early.append(lr_valid_acc)
-						stop_early_gm.append(gm_valid_acc)
+						best_epoch_lr = epoch
+						best_score_lr_val = lr_valid_acc
+						best_score_lr = lr_acc
+						best_epoch_gm = epoch
+						best_score_gm_val = gm_valid_acc
+						best_score_gm = gm_acc
+						best_score_lr_prec = lr_prec
+						best_score_lr_recall  = lr_recall
+						best_score_gm_prec = gm_prec
+						best_score_gm_recall  = gm_recall
+						stop_early = []
+						stop_early_gm = []
+					#checkpoint = {'theta': theta,'pi': pi}
+					# torch.save(checkpoint, save_folder+"/gm_"+str(epoch)    +".pt")
+					#checkpoint = {'params': self.lr_model.state_dict()}
+					# torch.save(checkpoint, save_folder+"/lr_"+ str(epoch)+".pt")
 
-				print('Best Epoch LR', best_epoch_lr)
-				print('Best Epoch GM', best_epoch_gm)
-				print("Run \t",lo, "Epoch, GM, LR \t", best_score_gm, best_score_lr)
-				print("Run \t",lo, "GM Val, LR Val \t", best_score_gm_val, best_score_lr_val)
-				final_score_gm.append(best_score_gm)
-				final_score_lr.append(best_score_lr)
-				final_score_lr_prec.append(best_score_lr_prec)
-				final_score_lr_recall.append(best_score_lr_recall)
 
-				final_score_gm_prec.append(best_score_gm_prec)
-				final_score_gm_recall.append(best_score_gm_recall)
+				if len(stop_early) > 10 and len(stop_early_gm) > 10 and (all(best_score_lr_val >= k for k in stop_early) or \
+				all(best_score_gm_val >= k for k in stop_early_gm)):
+					print('Early Stopping at', best_epoch_gm, best_score_gm, best_score_lr)
+					print('Validation score Early Stopping at', best_epoch_gm, best_score_lr_val, best_score_gm_val)
+					break
+				else:
+					stop_early.append(lr_valid_acc)
+					stop_early_gm.append(gm_valid_acc)
 
-				final_score_gm_val.append(best_score_gm_val)
-				final_score_lr_val.append(best_score_lr_val)
+			print('Best Epoch LR', best_epoch_lr)
+			print('Best Epoch GM', best_epoch_gm)
+			print("Run \t",lo, "Epoch, GM, LR \t", best_score_gm, best_score_lr)
+			print("Run \t",lo, "GM Val, LR Val \t", best_score_gm_val, best_score_lr_val)
+			final_score_gm.append(best_score_gm)
+			final_score_lr.append(best_score_lr)
+			final_score_lr_prec.append(best_score_lr_prec)
+			final_score_lr_recall.append(best_score_lr_recall)
+
+			final_score_gm_prec.append(best_score_gm_prec)
+			final_score_gm_recall.append(best_score_gm_recall)
+
+			final_score_gm_val.append(best_score_gm_val)
+			final_score_lr_val.append(best_score_lr_val)
 
 
-			print("===================================================")
-			print("TEST Averaged scores are for LR", np.mean(final_score_lr))
-			print("TEST Precision average scores are for LR", np.mean(final_score_lr_prec))
-			print("TEST Recall average scores are for LR", np.mean(final_score_lr_recall))
-			print("===================================================")
-			print("TEST Averaged scores are for GM",  np.mean(final_score_gm))
-			print("TEST Precision average scores are for GM", np.mean(final_score_gm_prec))
-			print("TEST Recall average scores are for GM", np.mean(final_score_gm_recall))
-			print("===================================================")
-			print("VALIDATION Averaged scores are for GM,LR", np.mean(final_score_gm_val), np.mean(final_score_lr_val))
-			print("TEST STD  are for GM,LR", np.std(final_score_gm), np.std(final_score_lr))
-			print("VALIDATION STD  are for GM,LR", np.std(final_score_gm_val), np.std(final_score_lr_val))
+		print("===================================================")
+		print("TEST Averaged scores are for LR", np.mean(final_score_lr))
+		print("TEST Precision average scores are for LR", np.mean(final_score_lr_prec))
+		print("TEST Recall average scores are for LR", np.mean(final_score_lr_recall))
+		print("===================================================")
+		print("TEST Averaged scores are for GM",  np.mean(final_score_gm))
+		print("TEST Precision average scores are for GM", np.mean(final_score_gm_prec))
+		print("TEST Recall average scores are for GM", np.mean(final_score_gm_recall))
+		print("===================================================")
+		print("VALIDATION Averaged scores are for GM,LR", np.mean(final_score_gm_val), np.mean(final_score_lr_val))
+		print("TEST STD  are for GM,LR", np.std(final_score_gm), np.std(final_score_lr))
+		print("VALIDATION STD  are for GM,LR", np.std(final_score_gm_val), np.std(final_score_lr_val))
 
-		return
+	return
