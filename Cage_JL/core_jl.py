@@ -168,6 +168,11 @@ class Joint_Learning:
 		self.theta = torch.ones((self.n_classes, self.n_lfs)).double() * 1
 		self.pi_y = torch.ones(self.n_classes).double()
 
+		if self.feature_model == 'lr':
+			self.lr_model = LogisticRegression(self.n_features, self.n_classes)
+		elif self.feature_model =='nn':
+			self.lr_model = DeepNet(n_features, self.n_hidden, self.n_classes)
+
 		def fit():
 			'''
 			'''
@@ -182,14 +187,9 @@ class Joint_Learning:
 
 				self.pi_y = torch.ones(self.n_classes).double()
 				(self.pi_y).requires_grad = True
-
-				if self.feature_model == 'lr':
-					lr_model = LogisticRegression(self.n_features, self.n_classes)
-				elif self.feature_model =='nn':
-					lr_model = DeepNet(n_features, self.n_hidden, self.n_classes)
 				
-				optimizer = torch.optim.Adam([{"params": lr_model.parameters()}, {"params": [self.pi, self.pi_y, self.theta]}], lr=0.001)
-				optimizer_lr = torch.optim.Adam(lr_model.parameters(), lr = self.lr_feature)
+				optimizer = torch.optim.Adam([{"params": self.lr_model.parameters()}, {"params": [self.pi, self.pi_y, self.theta]}], lr=0.001)
+				optimizer_lr = torch.optim.Adam(self.lr_model.parameters(), lr = self.lr_feature)
 				optimizer_gm = torch.optim.Adam([self.theta, self.pi, self.pi_y], lr = self.lr_gm, weight_decay=0)
 				supervised_criterion = torch.nn.CrossEntropyLoss()
 
@@ -203,7 +203,7 @@ class Joint_Learning:
 				stop_early, stop_early_gm = [], []
 
 				for epoch in range(self.n_epochs):
-					lr_model.train()
+					self.lr_model.train()
 
 					for batch_ndx, sample in enumerate(loader):
 						optimizer_lr.zero_grad()
@@ -218,21 +218,21 @@ class Joint_Learning:
 
 						if(self.loss_func_mask[0]):
 							if len(supervised_indices) > 0:
-								loss_1 = supervised_criterion(lr_model(sample[0][supervised_indices]), sample[1][supervised_indices])
+								loss_1 = supervised_criterion(self.lr_model(sample[0][supervised_indices]), sample[1][supervised_indices])
 							else:
 								loss_1 = 0
 						else:
 							loss_1=0
 
 						if(self.loss_func_mask[1]):
-							unsupervised_lr_probability = torch.nn.Softmax()(lr_model(sample[0][unsupervised_indices]))
+							unsupervised_lr_probability = torch.nn.Softmax()(self.lr_model(sample[0][unsupervised_indices]))
 							loss_2 = entropy(unsupervised_lr_probability)
 						else:
 							loss_2=0
 
 						if(self.loss_func_mask[2]):
 							y_pred_unsupervised = pred_gm(self.theta, self.pi_y, self.pi, sample[2][unsupervised_indices], sample[3][unsupervised_indices], self.k, self.n_classes, self.continuous_mask, self.qc)
-							loss_3 = supervised_criterion(lr_model(sample[0][unsupervised_indices]), torch.tensor(y_pred_unsupervised))
+							loss_3 = supervised_criterion(self.lr_model(sample[0][unsupervised_indices]), torch.tensor(y_pred_unsupervised))
 						else:
 							loss_3 = 0
 
@@ -255,7 +255,7 @@ class Joint_Learning:
 								probs_graphical = probability(self.theta, self.pi_y, self.pi,sample[2][unsupervised_indices],sample[3][unsupervised_indices],\
 									self.k, self.n_classes, self.continuous_mask, self.qc)
 							probs_graphical = (probs_graphical.t() / probs_graphical.sum(1)).t()
-							probs_lr = torch.nn.Softmax()(lr_model(sample[0]))
+							probs_lr = torch.nn.Softmax()(self.lr_model(sample[0]))
 							#loss_6 = kl_divergence(probs_lr, probs_graphical) # todo: include experiment?
 							loss_6 = kl_divergence(probs_graphical, probs_lr) #original version
 						else:
@@ -289,7 +289,7 @@ class Joint_Learning:
 						gm_valid_acc = score(self.y_valid, y_pred, average = self.metric_avg)
 
 					#LR Test
-					probs = torch.nn.Softmax()(lr_model(self.x_test))
+					probs = torch.nn.Softmax()(self.lr_model(self.x_test))
 					y_pred = np.argmax(probs.detach().numpy(), 1)
 					if self.use_accuracy_score:
 						lr_acc =score(self.y_test, y_pred)
@@ -299,7 +299,7 @@ class Joint_Learning:
 						lr_recall = recall_score(self.y_test, y_pred, average = self.metric_avg)
 
 					#LR Validation
-					probs = torch.nn.Softmax()(lr_model(self.x_valid))
+					probs = torch.nn.Softmax()(self.lr_model(self.x_valid))
 					y_pred = np.argmax(probs.detach().numpy(), 1)
 					if self.use_accuracy_score:
 						lr_valid_acc = score(self.y_valid, y_pred)
@@ -338,7 +338,7 @@ class Joint_Learning:
 							stop_early_gm = []
 						#checkpoint = {'theta': theta,'pi': pi}
 						# torch.save(checkpoint, save_folder+"/gm_"+str(epoch)    +".pt")
-						#checkpoint = {'params': lr_model.state_dict()}
+						#checkpoint = {'params': self.lr_model.state_dict()}
 						# torch.save(checkpoint, save_folder+"/lr_"+ str(epoch)+".pt")
 						
 
@@ -373,7 +373,7 @@ class Joint_Learning:
 							stop_early_gm = []
 						#checkpoint = {'theta': theta,'pi': pi}
 						# torch.save(checkpoint, save_folder+"/gm_"+str(epoch)    +".pt")
-						#checkpoint = {'params': lr_model.state_dict()}
+						#checkpoint = {'params': self.lr_model.state_dict()}
 						# torch.save(checkpoint, save_folder+"/lr_"+ str(epoch)+".pt")
 
 
