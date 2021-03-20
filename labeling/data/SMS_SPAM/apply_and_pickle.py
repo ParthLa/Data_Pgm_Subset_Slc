@@ -5,10 +5,6 @@ from utils import load_data_to_numpy
 import re
 
 X, Y = load_data_to_numpy()
-applier = LFApplier(lfs = LFS)
-
-L,S = applier.apply(X)
-
 
 sms_noisy_labels = NoisyLabels("sms",X,Y,LFS)
 L,S = sms_noisy_labels.get_labels()

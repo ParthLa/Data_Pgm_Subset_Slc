@@ -16,6 +16,10 @@ class LabelingFunction:
         self._resources = resources or {}
         self._pre = pre or []
         self._cont_scorer = cont_scorer
+        if self._cont_scorer is None:
+            self._is_cont=False
+        else:
+            self._is_cont=True
 
     def _preprocess_data_point(self, x: DataPoint) -> DataPoint:
         for preprocessor in self._pre:

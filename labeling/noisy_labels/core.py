@@ -18,20 +18,27 @@ class NoisyLabels:
         self._data = data
         self._truelabels = truelabels
         self._lfs = lfs
-
-        applier = LFApplier(lfs = lfs)
-        L,S = applier.apply(self._data)
-        self._L = L
-        self._S = S
-    
+        self._L = None
+        self._S = None
 
     def get_labels(self):
+        if self._L is None or self._S is none:
+            applier = LFApplier(lfs = self._lfs)
+            L,S = applier.apply(self._data)
+            self._L = L
+            self._S = S
         return self._L, self._S
 
     def generate_pickle(self, filename=None):
         if filename is None:
             filename = self.name+"_pickle"
         
+        if (self._L is None or self._S is None):
+            applier = LFApplier(lfs = self._lfs)
+            L,S = applier.apply(self._data)
+            self._L = L
+            self._S = S
+
         num_inst=self._data.shape[0]
         num_rules=self._L.shape[0]
 
