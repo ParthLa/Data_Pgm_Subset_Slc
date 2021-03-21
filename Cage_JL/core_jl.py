@@ -173,7 +173,7 @@ class Joint_Learning:
 		elif self.feature_model =='nn':
 			self.lr_model = DeepNet(n_features, self.n_hidden, self.n_classes)
 
-	def fit():
+	def fit(self):
 		'''
 		no input args
 		return: two predicted labels of numpy array of shape (num_instances,). first one is through gm(cage), other one through feature model
@@ -419,3 +419,39 @@ class Joint_Learning:
 
 	return pred_gm(self.theta, self.pi_y, self.pi, self.l_unsup, self.s_unsup, self.k, self.n_classes, self.continuous_mask, self.qc),\
 	 np.argmax((torch.nn.Softmax()(self.lr_model(self.x_unsup))).detach().numpy(), 1)
+
+	def predict_gm(self, l_test = None, s_test, m_test = None):
+		'''
+		input args:
+		l_test = None, s_test, m_test = None: numpy arrays of shape (num_instances, num_rules). l_test is matrix of predicted labels. m_test is matrix of triggered LFs
+		return: numpy array of shape (num_instances,) which are predicted labels
+		(Note: no aggregration/algorithm-running will be done using the current input)
+		'''
+		s_temp = torch.tensor(s_test).double()
+		s_temp[s_temp > 0.999] = 0.999
+		s_temp[s_temp < 0.001] = 0.001
+		if m_test != None:
+			assert m_test.shape == s_test.shape
+			assert m_test.shape[1] == self.n_lfs
+
+
+			return pred_gm(self.theta, self.pi_y, self.pi, m_test, s_temp, self.k, self.n_classes, self.continuous_mask, self.qc)
+		else:
+			assert l_test.shape == s_test.shape
+			assert l_test.shape[1] == self.n_lfs
+
+			l_temp = l_test
+			(l_temp)[l_temp == n_classes] = 0
+			(l_temp)[l_temp != n_classes] = 1
+			l_temp = torch.abs(torch.tensor(l_temp).long())
+			return pred_gm(self.theta, self.pi_y, self.pi, l_temp, s_temp, self.k, self.n_classes, self.continuous_mask, self.qc)
+
+	def predict_feature(self, x_test):
+		'''
+		input args:
+		x_test: numpy array of shape (num_instances, num_features)
+		return: numpy array of shape (num_instances,) which are predicted labels by feature model
+		(Note: no aggregration/algorithm-running will be done using the current input)
+		'''
+		return np.argmax((torch.nn.Softmax()(self.lr_model(x_test))).detach().numpy(), 1)
+

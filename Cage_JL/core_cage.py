@@ -94,7 +94,7 @@ class Cage:
 		self.pi_y = torch.ones(n_classes).double()
 		(self.pi_y).requires_grad = True
 
-	def fit():
+	def fit(self):
 		'''
 		input args: none
 		return: numpy array of shape (num_instances,) which are aggregated/predicted labels
@@ -109,21 +109,28 @@ class Cage:
 			optimizer.step()
 		return pred_gm(self.theta, self.pi_y, self.pi, self.l, self.s, self.k, self.n_classes, self.n, self.qc)
 
-	def predict(l_test, s_test):
+	def predict(self, l_test = None, s_test, m_test = None):
 		'''
 		input args:
-		l_test, s_test: numpy arrays of shape (num_instances, num_rules)
+		l_test = None, s_test, m_test = None: numpy arrays of shape (num_instances, num_rules). l_test is matrix of predicted labels. m_test is matrix of triggered LFs
 		return: numpy array of shape (num_instances,) which are predicted labels
 		(Note: no aggregration/algorithm-running will be done using the current input)
 		'''
-		assert l_test.shape == s_test.shape
-		assert l_test.shape[1] == n_lfs
-
 		s_temp = torch.tensor(s_test).double()
 		s_temp[s_temp > 0.999] = 0.999
 		s_temp[s_temp < 0.001] = 0.001
-		l_temp = l_test
-		(l_temp)[l_temp == n_classes] = 0
-		(l_temp)[l_temp != n_classes] = 1
-		l_temp = torch.abs(torch.tensor(l_temp).long())
-		return pred_gm(self.theta, self.pi_y, self.pi, l_temp, s_temp, self.k, self.n_classes, self.n, self.qc)
+		if m_test != None:
+			assert m_test.shape == s_test.shape
+			assert m_test.shape[1] == self.n_lfs
+
+
+			return pred_gm(self.theta, self.pi_y, self.pi, m_test, s_temp, self.k, self.n_classes, self.n, self.qc)
+		else:
+			assert l_test.shape == s_test.shape
+			assert l_test.shape[1] == self.n_lfs
+
+			l_temp = l_test
+			(l_temp)[l_temp == n_classes] = 0
+			(l_temp)[l_temp != n_classes] = 1
+			l_temp = torch.abs(torch.tensor(l_temp).long())
+			return pred_gm(self.theta, self.pi_y, self.pi, l_temp, s_temp, self.k, self.n_classes, self.n, self.qc)
