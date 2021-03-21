@@ -417,7 +417,7 @@ class Joint_Learning:
 		print("TEST STD  are for GM,LR", np.std(final_score_gm), np.std(final_score_lr))
 		print("VALIDATION STD  are for GM,LR", np.std(final_score_gm_val), np.std(final_score_lr_val))
 
-	return pred_gm(self.theta, self.pi_y, self.pi, self.l_unsup, self.s_unsup, self.k, self.n_classes, self.continuous_mask, self.qc),\
+		return pred_gm(self.theta, self.pi_y, self.pi, self.l_unsup, self.s_unsup, self.k, self.n_classes, self.continuous_mask, self.qc),\
 	 np.argmax((torch.nn.Softmax()(self.lr_model(self.x_unsup))).detach().numpy(), 1)
 
 	def predict_gm(self, l_test = None, s_test, m_test = None):
