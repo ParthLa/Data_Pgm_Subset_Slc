@@ -1,7 +1,7 @@
 from my_utils import get_data
 
 class Implyloss:
-	def __init__(self,data):
+	def __init__(self,data, num_classes):
 		'''
         * x : feature representation of instance
             - shape : [batch_size, num_features]
@@ -56,11 +56,54 @@ class Implyloss:
 		self.k=data[8]
 		self.num_features=self.x[1] # 1st dimension of x
 		self.num_rules_to_train=self.l[1]
+		self.num_classes = num_classes
+		self.w_network = functools.partial(w_network, self.w_var_scope, self.num_rules)
+		self.f_network = functools.partial(f_network, self.f_var_scope)
 	
-	# need to define get_weights_and_logits, f_network, 
-	# joint_scores_from_f_and_w, softmax_cross_entropy_with_logits,
+	# need to define f_network, 
+	# softmax_cross_entropy_with_logits,
 	# compute_LL_phi
 
+	def compute_LL_phi(self, w_logits, weights, l, m, L, d, r):
+        psi = 1e-25
+        L = tf.expand_dims(L,1)
+        # [batch_size, num_rules]
+        L = tf.tile(L,[1,self.num_rules])
+        loss = tf.nn.sigmoid_cross_entropy_with_logits(labels=tf.to_float(tf.equal(l,L)),
+                                                       logits=w_logits)
+        loss = m*loss
+        loss = (tf.to_float(tf.not_equal(l,L)) * loss) + (tf.to_float(tf.equal(l,L)) * r * loss)
+        gcross_loss = gcross_utils.generalized_cross_entropy_bernoulli(weights,0.2)
+        gcross_loss = gcross_loss * m * tf.to_float(tf.equal(l,L)) * (1-r)
+        loss = loss + gcross_loss
+        loss = tf.reduce_sum(loss,axis=-1)
+        loss = loss * d
+        loss = tf.reduce_mean(loss)
+        return loss
+    # joint_scores_from_f_and_w: Input - weights [batch_size, num_rules], m [batch_size, num_rules], f_probs [batch_size, num_classes], result - scalar 
+	def joint_scores_from_f_and_w(self,weights,m,f_probs):
+        num_classes = self.num_classes
+        rule_classes = self.rule_classes
+        #[batch_size, num_rules, 1]
+        weights = tf.expand_dims(weights,-1)
+        weights_mask = tf.to_float(tf.greater(weights,0.5))
+        #[batch_size, num_rules, 1]
+        m = tf.expand_dims(m,-1)
+        m = m*weights_mask
+        #[num_rules, num_classes]
+        one_hot_rule_classes = tf.one_hot(rule_classes,num_classes,dtype=tf.float32)
+        #[1, num_rules, num_classes]
+        one_hot_rule_classes = tf.expand_dims(one_hot_rule_classes,0)
+        #[batch_size, num_rules, num_classes]
+        rule_weight_product = weights * one_hot_rule_classes + (1-weights)*(1-one_hot_rule_classes)
+        sum_rule_firings = tf.reduce_sum(m,1)
+        result = m*rule_weight_product #+ (1-m)
+        #[batch_size, num_classes]
+        result = tf.reduce_sum(result,1)/(sum_rule_firings+1e-20)
+        result = result + f_probs
+        return result    
+
+	# get_weights_and_logits: Input - x [batch_size, num_rules], Output - weights [batch_size, num_rules], w_logits [batch_size, num_rules]
 	def get_weights_and_logits(self, x):
         # Need to run the w network for each rule for the same x
         #
@@ -103,6 +146,7 @@ class Implyloss:
 		self.weights = weights
 
 		# f_network
+		# f_dict: [batch_size, num_classes]
 		f_dict = {'x': self.x}
         f_logits = self.f_network(f_dict, self.num_classes, reuse=True, dropout_keep_prob=self.dropout_keep_prob)
         self.probs = tf.math.softmax(f_logits, axis=-1)
@@ -111,7 +155,7 @@ class Implyloss:
 
         # Do this so that the cross-entropy does not blow for data from U
         # The actual value of cross-entropy for U does not matter since it
-        # will be multiplied by 0 anyway.        
+        # will be multiplied by 0 anyway.
         L = L % self.num_classes
 
         # LL_theta term which is on d data
@@ -134,6 +178,8 @@ class Implyloss:
 
         # need to write loss functions
 
+num_classes = 6
 if __name__ == '__main__':
-	data = get_data(path) # path will be the path of pickle file
+	data = get_data(path, num_classes) # path will be the path of pickle file
 	Il = Implyloss(data)
+	Il.optimize()
