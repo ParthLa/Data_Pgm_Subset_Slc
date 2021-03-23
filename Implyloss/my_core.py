@@ -62,8 +62,9 @@ class Implyloss:
 	
 	# need to define f_network, 
 	# softmax_cross_entropy_with_logits,
-	# compute_LL_phi
 
+
+	# compute_LL_phi
 	def compute_LL_phi(self, w_logits, weights, l, m, L, d, r):
         psi = 1e-25
         L = tf.expand_dims(L,1)
@@ -178,8 +179,3 @@ class Implyloss:
 
         # need to write loss functions
 
-num_classes = 6
-if __name__ == '__main__':
-	data = get_data(path, num_classes) # path will be the path of pickle file
-	Il = Implyloss(data)
-	Il.optimize()
