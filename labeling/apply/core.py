@@ -1,5 +1,5 @@
 from itertools import chain
-from typing import DefaultDict, Dict, List, NamedTuple, Tuple, Union
+from typing import DefaultDict, Dict, List, Set, NamedTuple, Tuple, Union
 
 import numpy as np
 from tqdm import tqdm
@@ -7,6 +7,7 @@ from tqdm import tqdm
 from labeling.lf import LabelingFunction
 from labeling.types import DataPoint, DataPoints
 from labeling.utils.data_operators import check_unique_names
+from labeling.lf_set import *
 
 RowData = List[Tuple[int, int, int, float]]     # index of datapoint, index of lf, label, confidence
 
@@ -51,9 +52,10 @@ class BaseLFApplier:
 
     _use_recarray = False
 
-    def __init__(self, lfs: List[LabelingFunction]) -> None:
-        self._lfs = lfs
-        self._lf_names = [lf.name for lf in lfs]
+    def __init__(self, lf_set: LFSet) -> None:
+        # self._lf_set = lf_set
+        self._lfs = lf_set.get_lfs()
+        self._lf_names = [lf.name for lf in lf_set.get_lfs()]
         check_unique_names(self._lf_names)
 
     def _numpy_from_row_data(self, labels: List[RowData]) -> np.ndarray:
@@ -81,7 +83,7 @@ class BaseLFApplier:
 
 
 def apply_lfs_to_data_point(
-    x: DataPoint, index: int, lfs: List[LabelingFunction], f_caller: _FunctionCaller
+    x: DataPoint, index: int, lfs: Set[LabelingFunction], f_caller: _FunctionCaller
 ) -> RowData:
     """Label a single data point with a set of LFs.
     Parameters

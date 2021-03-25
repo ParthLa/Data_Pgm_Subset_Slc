@@ -20,26 +20,31 @@ def score(x, **kwargs):
     t3=kwargs["r3"]/kwargs["len2"]
     return t1*t2*t3
 
-@labeling_function(pre=[square], resources=lf_resources, cont_scorer=score)
+@labeling_function(pre=[square], resources=lf_resources, cont_scorer=score, label=0)
 def lf1(x, **kwargs):
     if np.linalg.norm(x['value']) < 1 and kwargs["r3"]==4:
         return 0
     return -1
 
-@labeling_function(pre=[square])                # no continuous scorer specified
-def lf2(x):
+@labeling_function(pre=[square], label=1)                # no continuous scorer specified
+def lf2(x, **kwargs):
     if np.linalg.norm(x['value']) < 1:
         return 1
     return -1
 
 lfs = [lf1, lf2]
-data = np.array([[0.14912444, 0.83544616, 0.61849807, 0.43523642],
-[0.14795163, 0.9986555,  0.27234144, 0.87403315]])
+rules = LFSet("myrules")
+rules.add_lf_list(lfs)
 
-applier = LFApplier(lfs=lfs)
-L,S=applier.apply(data)
-Lc=np.array([[0,  1],[-1, -1]])
-Sc=np.array([[0.2646661, -1.],[-1.,-1.]])
+dataX = np.array([[0.14912444, 0.83544616, 0.61849807, 0.43523642],
+                 [0.14795163, 0.9986555,  0.27234144, 0.87403315]])
+dataY = np.array([0, 1])
+applier = LFApplier(lf_set=rules)
+L,S=applier.apply(dataX)
+
+
+Lc=np.array([[1,  0],[-1, -1]])
+Sc=np.array([[-1., 0.2646661],[-1.,-1.]])
 
 if (np.allclose(S,Sc) and np.allclose(L,Lc)):
     print("works fine")

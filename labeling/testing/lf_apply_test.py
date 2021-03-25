@@ -4,12 +4,12 @@ from labeling.preprocess import *
 import numpy as np
 
 @preprocessor()
-def square(x):
+def square(x, **kwargs):
     return {"value":x*x}
 
 
-@labeling_function(pre=[square])
-def func(x):
+@labeling_function(pre=[square], label=0)
+def func(x, **kwargs):
     if x['value'] == 0:
         return 0
     else:
@@ -17,11 +17,13 @@ def func(x):
 
 
 lfs = [func]
+rules = LFSet("myrules")
+rules.add_lf_list(lfs)
 
 [print(x) for x in lfs]
 
 data = np.ones((5,1))
-applier = LFApplier(lfs=lfs)
+applier = LFApplier(lf_set=rules)
 L,S=applier.apply(data)
 if np.allclose(L,np.ones((5,1))):
     print("="*10+"Basic lf and apply testing is successfull"+"="*10)
