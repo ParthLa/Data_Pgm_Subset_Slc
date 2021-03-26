@@ -196,6 +196,8 @@ class Implyloss:
 		# need to write loss functions
 
 	def implication_loss(self, weights, f_probs, m, rule_classes, num_classes, d):
+		''' this is an implication loss function'''
+		
         # computes implication loss (Equation 4 in the paper)
         # weights are P_{j,\phi} values from the w network (rule network)
         # weights: [batch_size, num_rules] 

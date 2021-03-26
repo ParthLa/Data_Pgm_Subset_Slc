@@ -12,7 +12,7 @@ Welcome to Edurevol's documentation!
 
 Edurevol Main
 =========================
-.. automodule:: src.test
+.. automodule:: Implyloss.docs_test
 	:members:
 
 
