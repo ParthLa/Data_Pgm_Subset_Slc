@@ -6,13 +6,17 @@ class LabelingFunction:
     def __init__(
         self,
         name: str,
-        f: Callable[..., int],
+        f: Callable[..., int],                              # label
+        label: int,
         resources: Optional[Mapping[str, Any]] = None,
         pre: Optional[List[BasePreprocessor]] = None,
         cont_scorer: Optional[BaseContinuousScorer] = None,
     ) -> None:
         self.name = name
         self._f = f
+        if label is None:
+            raise ValueError('Have to give which class this lf is associated with')
+        self._label = label
         self._resources = resources or {}
         self._pre = pre or []
         self._cont_scorer = cont_scorer
@@ -31,9 +35,12 @@ class LabelingFunction:
     def __call__(self, x: DataPoint) -> (int, float):
         x = self._preprocess_data_point(x)
         if self._cont_scorer is None:
-            return self._f(x,**self._resources), -1.0            
-        return self._f(x,**self._resources), self._cont_scorer(x,**self._resources) 
-
+            cs = -1.0
+        else:
+            cs = self._cont_scorer(x,**self._resources)
+        dic = {"continuous_score": cs}
+        return self._f(x,**self._resources, **dic), cs                                   
+        
     def __repr__(self) -> str:
         preprocessor_str = f", Preprocessors: {self._pre}"
         return f"{type(self).__name__} {self.name}{preprocessor_str}"
@@ -43,6 +50,7 @@ class labeling_function:
     def __init__(
         self,
         name: Optional[str] = None,
+        label: Optional[int] = None,
         resources: Optional[Mapping[str, Any]] = None,
         pre: Optional[List[BasePreprocessor]] = None,
         cont_scorer: Optional[BaseContinuousScorer] = None,
@@ -50,10 +58,11 @@ class labeling_function:
         if callable(name):
             raise ValueError("Looks like this decorator is missing parentheses!")
         self.name = name
+        self.label = label
         self.resources = resources
         self.pre = pre
         self.cont_scorer = cont_scorer
 
     def __call__(self, f: Callable[..., int]) -> LabelingFunction:
         name = self.name or f.__name__
-        return LabelingFunction(name=name, resources=self.resources, f=f, pre=self.pre, cont_scorer=self.cont_scorer)
+        return LabelingFunction(name=name, resources=self.resources, f=f, pre=self.pre, cont_scorer=self.cont_scorer, label=self.label)

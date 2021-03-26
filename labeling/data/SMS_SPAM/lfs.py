@@ -1,7 +1,7 @@
 from labeling.lf import *
 from labeling.preprocess import *
 from labeling.continuous_scoring import *
-
+from labeling.lf_set import *
 
 from con_scorer import word_similarity
 
@@ -129,3 +129,6 @@ LFS = [LF1,
     CLF5,
     CLF6,
     CLF7]
+
+rules = LFSet("set1")
+rules.add_lf_list(LFS)
