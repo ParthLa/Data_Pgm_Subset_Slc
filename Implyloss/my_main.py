@@ -3,6 +3,7 @@ from my_core import Implyloss
 
 num_classes = 6
 if __name__ == '__main__':
-	data = get_data(path, num_classes) # path will be the path of pickle file
-	Il = Implyloss(data)
+	path = "d_processed.p"
+	data = get_data(path) # path will be the path of pickle file
+	Il = Implyloss(data,num_classes)
 	Il.optimize()
