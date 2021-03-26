@@ -1,5 +1,5 @@
 """
-.. module:: controller
+.. module:: docs_test
    :synopsis: All endpoints of the Teacher API are defined here
 .. moduleauthor:: Rich Yap <github.com/richyap13>
 """

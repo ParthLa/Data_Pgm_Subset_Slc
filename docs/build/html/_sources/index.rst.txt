@@ -12,10 +12,9 @@ Welcome to Edurevol's documentation!
 
 Edurevol Main
 =========================
-.. automodule:: Implyloss.docs_test
+
+.. automodule:: docs_test
 	:members:
-
-
 
 Indices and tables
 ==================
@@ -23,3 +22,12 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
+
+Labelling(Vineeth and Harshad)
+================================
+
+Guttu
+==================
+
+Parth
+===================
