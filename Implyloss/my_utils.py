@@ -35,6 +35,7 @@ def analyze_w_predictions(x,l,m,L,d,weights,probs,rule_classes):
 	print("new rule firings: ", len([i for i in new_m if sum(i) > 0]))
 
 def convert_weights_to_m(weights):
+	'''converts weights to m '''
 	new_m = weights > 0.5
 	new_m = new_m.astype(np.int32)
 	return new_m
