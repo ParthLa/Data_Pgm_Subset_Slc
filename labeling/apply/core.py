@@ -40,19 +40,17 @@ class BaseLFApplier:
     on a collection of data points. Subclasses should operate on
     a single data point collection format (e.g. ``DataFrame``).
     Subclasses must implement the ``apply`` method.
-    Parameters
-    ----------
-    lfs
-        LFs that this applier executes on examples
-    Raises
-    ------
-    ValueError
-        If names of LFs are not unique
-    """
 
+    Args:
+        lf_set (LFSet): Instace of LFset which has information of set of labeling functions(which is applied on data)
+    
+    Raises:
+        ValueError:
+            If names of LFs are not unique
+    """
     _use_recarray = False
 
-    def __init__(self, lf_set: LFSet) -> None:
+    def __init__(self, lf_set: LFSet) -> None:    
         # self._lf_set = lf_set
         self._lfs = lf_set.get_lfs()
         self._lf_names = [lf.name for lf in lf_set.get_lfs()]
@@ -85,21 +83,16 @@ class BaseLFApplier:
 def apply_lfs_to_data_point(
     x: DataPoint, index: int, lfs: Set[LabelingFunction], f_caller: _FunctionCaller
 ) -> RowData:
-    """Label a single data point with a set of LFs.
-    Parameters
-    ----------
-    x
-        Data point to label
-    index
-        Index of the data point
-    lfs
-        Set of LFs to label ``x`` with
-    f_caller
-        A ``_FunctionCaller`` to record failed LF executions
-    Returns
-    -------
-    RowData
-        A list of (data point index, LF index, label) tuples
+    """Label a single data point with a set of LFs
+
+    Args:
+        x (DataPoint): Data point to label
+        index (int): Index of the data point
+        lfs (Set[LabelingFunction]): Set of LFs to label ``x`` with
+        f_caller (_FunctionCaller): A ``_FunctionCaller`` to record failed LF executions
+
+    Returns:
+        RowData: A list of (data point index, LF index, label) tuples
     """
     labels = []
     for j, lf in enumerate(lfs):
@@ -111,27 +104,26 @@ def apply_lfs_to_data_point(
 
 class LFApplier(BaseLFApplier):
     """LF applier for a list of data points (e.g. ``SimpleNamespace``) or a NumPy array.
-    Parameters
-    ----------
-    lfs
-        LFs that this applier executes on examples
-    Example
-    -------
-    >>> from snorkel.labeling import labeling_function
-    >>> @labeling_function()
-    ... def is_big_num(x):
-    ...     return 1 if x.num > 42 else 0
-    >>> applier = LFApplier([is_big_num])
-    >>> from types import SimpleNamespace
-    >>> applier.apply([SimpleNamespace(num=10), SimpleNamespace(num=100)])
-    array([[0], [1]])
-    >>> @labeling_function()
-    ... def is_big_num_np(x):
-    ...     return 1 if x[0] > 42 else 0
-    >>> applier = LFApplier([is_big_num_np])
-    >>> applier.apply(np.array([[10], [100]]))
-    array([[0], [1]])
-    """
+
+    Args:
+        lf_set (LFSet): Instace of LFset which has information of set of labeling functions(which is applied on data)
+    """ 
+
+    # Example:
+    #     >>> from labeling.lf import labeling_function
+    #     >>> @labeling_function()
+    #     ... def is_big_num(x,**kwargs):
+    #     ...     return 1 if x.num > 42 else 0
+    #     >>> applier = LFApplier([is_big_num])
+    #     >>> from types import SimpleNamespace
+    #     >>> applier.apply([SimpleNamespace(num=10), SimpleNamespace(num=100)])
+    #     array([[0], [1]])
+    #     >>> @labeling_function()
+    #     ... def is_big_num_np(x):
+    #     ...     return 1 if x[0] > 42 else 0
+    #     >>> applier = LFApplier([is_big_num_np])
+    #     >>> applier.apply(np.array([[10], [100]]))
+    #     array([[0], [1]])  
 
     def apply(
         self,
@@ -141,23 +133,20 @@ class LFApplier(BaseLFApplier):
         return_meta: bool = False,
     ) -> Union[np.ndarray, Tuple[np.ndarray, ApplierMetadata]]:
         """Label list of data points or a NumPy array with LFs.
-        Parameters
-        ----------
-        data_points
-            List of data points or NumPy array to be labeled by LFs
-        progress_bar
-            Display a progress bar?
-        fault_tolerant
-            Output ``-1`` if LF execution fails?
-        return_meta
-            Return metadata from apply call?
-        Returns
-        -------
-        np.ndarray
-            Matrix of labels emitted by LFs
-        ApplierMetadata
-            Metadata, such as fault counts, for the apply call
-        """
+
+        Args:
+            data_points (Union[DataPoints, np.ndarray]): List of data points or NumPy array to be labeled by LFs
+            progress_bar (bool, optional): Display a progress bar?. Defaults to True.
+            fault_tolerant (bool, optional): Output ``-1`` if LF execution fails?. Defaults to False.
+            return_meta (bool, optional): Return metadata from apply call?. Defaults to False.
+
+        Returns:
+            Union[np.ndarray, Tuple[np.ndarray, ApplierMetadata]]:
+                np.ndarray:
+                    Matrix of labels emitted by LFs
+                ApplierMetadata:
+                    Metadata, such as fault counts, for the apply call
+        """        
         labels = []
         f_caller = _FunctionCaller(fault_tolerant)
         for i, x in tqdm(enumerate(data_points), disable=(not progress_bar)):
