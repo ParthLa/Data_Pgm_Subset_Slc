@@ -16,6 +16,14 @@ class NoisyLabels:
         gold_labels: Optional[DataPoints],
         rules: LFSet,
     ) -> None:
+        """Instantiates NoisyLabels class with dataset and set of LFs to noisily label the dataset
+
+        Args:
+            name (str): Name for this object.
+            data (DataPoints): Datapoints.
+            gold_labels (Optional[DataPoints]): Labels for datapoints if available.
+            rules (LFSet): Set of Rules to generate noisy labels for the dataset.
+        """
         self.name = name
         self._data = data
         self._gold_labels = gold_labels
@@ -24,6 +32,11 @@ class NoisyLabels:
         self._S = None
 
     def get_labels(self):
+        """Applies LFs to the dataset to generate noisy labels and returns noisy labels and confidence scores
+
+        Returns:
+            Tuple(DataPoints, DataPoints): Noisy Labels and Confidences
+        """
         if self._L is None or self._S is none:
             applier = LFApplier(lf_set = self._rules)
             L,S = applier.apply(self._data)
@@ -32,6 +45,11 @@ class NoisyLabels:
         return self._L, self._S
 
     def generate_pickle(self, filename=None):
+        """Generates a pickle file with noisy labels, confidence and other Metadata
+
+        Args:
+            filename (str, optional): Name for pickle file. Defaults to None.
+        """
         if filename is None:
             filename = self.name+"_pickle"
         
