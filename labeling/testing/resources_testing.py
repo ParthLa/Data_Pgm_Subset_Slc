@@ -42,9 +42,12 @@ dataY = np.array([0, 1])
 applier = LFApplier(lf_set=rules)
 L,S=applier.apply(dataX)
 
-
-Lc=np.array([[1,  0],[-1, -1]])
-Sc=np.array([[-1., 0.2646661],[-1.,-1.]])
+if (next(iter(rules.get_lfs())) == lf1):
+    Lc=np.array([[0,  1],[-1, -1]])
+    Sc=np.array([[0.2646661, -1.],[-1.,-1.]])
+else:
+    Lc=np.array([[1,  0],[-1, -1]])
+    Sc=np.array([[-1., 0.2646661],[-1.,-1.]])
 
 if (np.allclose(S,Sc) and np.allclose(L,Lc)):
     print("works fine")

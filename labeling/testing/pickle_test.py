@@ -46,8 +46,12 @@ test_data_noisy_labels = NoisyLabels("testdata", dataX, dataY, rules)
 L,S = test_data_noisy_labels.get_labels()
 test_data_noisy_labels.generate_pickle()
 
-Lc=np.array([[0,  1],[-1, -1]])
-Sc=np.array([[0.2646661, -1.],[-1.,-1.]])
+if (next(iter(rules.get_lfs())) == lf1):
+    Lc=np.array([[0,  1],[-1, -1]])
+    Sc=np.array([[0.2646661, -1.],[-1.,-1.]])
+else:
+    Lc=np.array([[1,  0],[-1, -1]])
+    Sc=np.array([[-1., 0.2646661],[-1.,-1.]])
 
 f=open("testdata_pickle","rb")
 loaded=[]

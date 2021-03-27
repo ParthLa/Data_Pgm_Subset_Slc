@@ -2,6 +2,7 @@ from typing import Any, Callable, List, Set, Mapping, Optional
 from labeling.types import DataPoint, DataPoints
 from labeling.apply import *
 from labeling.lf import *
+import warnings
 
 import pickle
 import numpy as np
@@ -25,7 +26,7 @@ class LFSet:              # LFSet
         lf: LabelingFunction,
     ) -> None:
         if lf in self._lfs:
-            pass # warning
+            warnings.warn('Attempting to add duplicate LF to LFset') 
         else:
             self._lfs.add(lf)
     
@@ -34,7 +35,7 @@ class LFSet:              # LFSet
         lf_list: List[LabelingFunction],
     ) -> None:
         if len(self._lfs.intersection(lf_list))>0:
-            pass # warn
+            warnings.warn('Attempting to add duplicate LF to LFset') 
         self._lfs = self._lfs.union(lf_list)
     
     def remove_lf(

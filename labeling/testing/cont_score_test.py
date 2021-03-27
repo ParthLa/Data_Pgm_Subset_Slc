@@ -32,8 +32,13 @@ data = np.array([[0.0983969,0.52830115, 0.90600643, 0.24581662], [0.80224391, 0.
 
 applier = LFApplier(lf_set=rules)
 L,S=applier.apply(data)
-Lc=np.array([[1, 0], [1, 0]])
-Sc=np.array([[-1., 0.41930488],[-1., 0.41977896]])
+
+if (next(iter(rules.get_lfs())) != lf1):
+    Lc=np.array([[1, 0], [1, 0]])
+    Sc=np.array([[-1., 0.41930488],[-1., 0.41977896]])
+else:
+    Lc=np.array([[0, 1], [0, 1]])
+    Sc=np.array([[0.41930488, -1.],[0.41977896, -1.]])
 
 if (np.allclose(S,Sc) and np.allclose(L,Lc)):
     print("works fine")

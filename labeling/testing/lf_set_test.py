@@ -60,8 +60,14 @@ L,S = test_data_noisy_labels.get_labels()
 test_data_noisy_labels.generate_pickle()
 
 # Checking correctness ##
-Lc=np.array([[0,  1],[-1, -1],[ 0,  1]])
-Sc=np.array([[0.26463369, -1.],[-1.,-1.],[ 0.32993693, -1.]])
+if (next(iter(rules.get_lfs())) == lf1):
+    Lc=np.array([[0,  1],[-1, -1],[ 0,  1]])
+    Sc=np.array([[0.26463369, -1.],[-1.,-1.],[ 0.32993693, -1.]])
+else:
+    Lc=np.array([[1,  0],[-1, -1],[1,  0]])
+    Sc=np.array([[-1., 0.26463369],[-1.,-1.],[-1., 0.32993693]])
+
+
 
 f=open("testdata_pickle","rb")
 loaded=[]
