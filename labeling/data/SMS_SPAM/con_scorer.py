@@ -4,8 +4,8 @@ from gensim.parsing.preprocessing import STOPWORDS
 from gensim.models.keyedvectors import KeyedVectors
 import gensim.matutils as gm
 
+print("model loading")
 model = KeyedVectors.load_word2vec_format('dataset/glove_w2v.txt', binary=False)
-
 print("model loaded")
 
 def get_word_vectors(btw_words):
