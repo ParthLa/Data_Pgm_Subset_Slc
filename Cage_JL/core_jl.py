@@ -2,6 +2,7 @@ import torch
 from torch import optim
 from torch.utils.data import TensorDataset, DataLoader
 import numpy as np
+import sklearn
 
 from utils import *
 from utils_jl import *
@@ -13,45 +14,34 @@ class Joint_Learning:
 	Joint_Learning class:
 		Class for Joint Learning algorithm
 		[Note: from here on, feature model is short for feature-based classification model and graphical model imply CAGE algorithm]
+	
+	Args:
+		n_classes: Number of classes/labels, type is integer
+		path_L: Path to pickle file of labelled instances
+		path_U: Path to pickle file of unlabelled instances
+		path_V: Path to pickle file of validation instances
+		path_T: Path to pickle file of test instances
+		loss_func_mask: list/numpy array of size 7 or (7,) where loss_func_mask[i] should be 1 if Loss function (i+1) should be included, 0 else
+		is_qt: True if quality guide is available. False if quality guide is intended to be found from validation instances
+		is_qc: True if quality index is available. False if quality index is intended to be found from validation instances
+		batch_size: Batch size, type should be integer
+		lr_feature: Learning rate for feature model, type is integer or float
+		lr_gm: Learning rate for graphical model(cage), type is integer or float
+		use_accuracy_score: The score to use for termination condition on validation set. True for accuracy_score, False for f1_score
+		feature_model: The model intended to be used for features, allowed values are 'lr' or 'nn' string, default is 'nn'
+		metric_avg: Average metric to be used in calculating f1_score/precision/recall, default is 'macro'
+		qt: Quality guide of shape (n_lfs,) and type numpy.ndarray OR a float. Values must be between 0 and 1
+		qc: Quality index of shape (n_lfs,) and type numpy.ndarray OR a float. Values must be between 0 and 1
+		n_hidden: Number of hidden layer nodes if feature model is 'nn', type is integer, default value is 512
+		n_epochs: Number of epochs in each run, type is integer, default value is 100
+		n_runs: Number of runs ,type is integer, default value is 10
+		start_len: A parameter used in validation, type is integer, default is 5
+		stop_len: A parameter used in validation, type is integer, default is 10
+
 	'''
 	def __init__(self, n_classes, path_L, path_U, path_V, path_T , loss_func_mask, is_qt, is_qc, batch_size, lr_feature, lr_gm,\
 	 use_accuracy_score, feature_model = 'nn', metric_avg = 'macro', qt = None, qc = None, n_hidden = 512, n_epochs = 100, n_runs = 10, start_len = 5, stop_len = 10):
-		'''
-		Args:
-			n_classes: Number of classes/labels, type is integer
-			path_L: Path to pickle file of labelled instances
-			path_U: Path to pickle file of unlabelled instances
-			path_V: Path to pickle file of validation instances
-			path_T: Path to pickle file of test instances
-			[Note: each pickle file should follow the standard convention for data storage]
-			loss_func_mask: list/numpy array of size 7 or (7,) where loss_func_mask[i] should be 1 if Loss function (i+1) should be included
-			[Note: Loss function number, Calculated over, Loss function:
-					1, L, Cross Entropy(prob_from_feature_model, true_labels)
-					2, U, Entropy(prob_from_feature_model)
-					3, U, Cross Entropy(prob_from_feature_model, prob_from_graphical_model)
-					4, L, Negative Log Likelihood
-					5, U, Negative Log Likelihood(marginalised over true labels)
-					6, L and U, KL Divergence(prob_feature_model, prob_graphical_model)
-					7, Quality guide
-			]
-			is_qt: True if quality guide is available. False if quality guide is intended to be found from validation instances
-			is_qc: True if quality index is available. False if quality index is intended to be found from validation instances
-			batch_size: Batch size, type should be integer
-			lr_feature: Learning rate for feature model, type is integer or float
-			lr_gm: Learning rate for graphical model(cage), type is integer or float
-			use_accuracy_score: The score to use for termination condition on validation set. True for accuracy_score, False for f1_score
-			feature_model: The model intended to be used for features, allowed values are 'lr' or 'nn' string, default is 'nn'
-			metric_avg: Average metric to be used in calculating f1_score/precision/recall, default is 'macro'
-			qt: Quality guide of shape (n_lfs,) and type numpy.ndarray OR a float. Values must be between 0 and 1
-			qc: Quality index of shape (n_lfs,) and type numpy.ndarray OR a float. Values must be between 0 and 1
-			n_hidden: Number of hidden layer nodes if feature model is 'nn', type is integer, default value is 512
-			n_epochs: Number of epochs in each run, type is integer, default value is 100
-			n_runs: Number of runs ,type is integer, default value is 10
-			start_len: A parameter used in validation, type is integer, default is 5
-			stop_len: A parameter used in validation, type is integer, default is 10
-		Return:
-			no return value
-	'''
+
 		assert type(n_classes) == np.int or type(n_classes) == np.float
 		assert type(path_L) == str and type(path_V) == str and type(path_V) == str and type(path_T) == str and type(metric_avg) == str
 		assert os.path.exists(path_L) and os.path.exists(path_U) and os.path.exists(path_V) and os.path.exists(path_T)
@@ -113,8 +103,8 @@ class Joint_Learning:
 			from sklearn.metrics import accuracy_score as score
 		else:
 			from sklearn.metrics import f1_score as score
-			from sklearn.metrics import precision_score as prec_score
-			from sklearn.metrics import recall_score as recall_score
+		from sklearn.metrics import precision_score as prec_score
+		from sklearn.metrics import recall_score as recall_score
 
 
 		data_L = get_data(path_L)
@@ -154,13 +144,24 @@ class Joint_Learning:
 		self.n_lfs = self.l_sup.shape[1]
 		self.continuous_mask = torch.tensor(data_L[7]).double() # Mask for s/continuous_mask
 
-		'''
-		shapes of x,y,l,s:
-			x: [num_instances, num_features], feature matrix
-			y: [num_instances, 1], true labels, if available
-			l: [num_instances, num_rules], 1 if LF is triggered, 0 else
-			s: [num_instances, num_rules], continuous score
-		'''
+		#[Note: 
+		#1. Loss function number, Calculated over, Loss function:
+		#		1, L, Cross Entropy(prob_from_feature_model, true_labels)
+		#		2, U, Entropy(prob_from_feature_model)
+		#		3, U, Cross Entropy(prob_from_feature_model, prob_from_graphical_model)
+		#		4, L, Negative Log Likelihood
+		#		5, U, Negative Log Likelihood(marginalised over true labels)
+		#		6, L and U, KL Divergence(prob_feature_model, prob_graphical_model)
+		#		7, Quality guide
+		#
+		#2. each pickle file should follow the standard convention for data storage]
+		#
+		#3. shapes of x,y,l,s:
+		#	x: [num_instances, num_features], feature matrix
+		#	y: [num_instances, 1], true labels, if available
+		#	l: [num_instances, num_rules], 1 if LF is triggered, 0 else
+		#	s: [num_instances, num_rules], continuous score
+		#]
 
 		assert self.x_sup.shape[1] == self.n_features and self.x_unsup.shape[1] == self.n_features \
 		 and self.x_valid.shape[1] == self.n_features and self.x_test.shape[1] == self.n_features
@@ -216,13 +217,17 @@ class Joint_Learning:
 		elif self.feature_model =='nn':
 			self.lr_model = DeepNet(n_features, self.n_hidden, self.n_classes)
 
-	def fit(self, path):
+	def fit(self, path = None):
 		'''
 		Args:
 			path: Path to log file
 		Return: 
 			Two predicted labels of numpy array of shape (num_instances,). first one is through graphical model, other one through feature model
 		'''
+
+		file = None
+		if path != None:
+			file = open(path, "a+")
 
 		use_cuda = torch.cuda.is_available()
 		device = torch.device("cuda:0" if use_cuda else "cpu")
@@ -325,8 +330,8 @@ class Joint_Learning:
 					gm_acc = score(self.y_test, y_pred)
 				else:
 					gm_acc = score(self.y_test, y_pred, average = self.metric_avg)
-					gm_prec = prec_score(self.y_test, y_pred, average = self.metric_avg)
-					gm_recall = recall_score(self.y_test, y_pred, average = self.metric_avg)
+				gm_prec = prec_score(self.y_test, y_pred, average = self.metric_avg)
+				gm_recall = recall_score(self.y_test, y_pred, average = self.metric_avg)
 
 				#gm Validation
 				y_pred = predict_gm(self.theta, self.pi, self.l_valid, self.s_valid, self.k, self.n_classes, self.continuous_mask, self.qc)
@@ -342,8 +347,8 @@ class Joint_Learning:
 					lr_acc =score(self.y_test, y_pred)
 				else:
 					lr_acc =score(self.y_test, y_pred, average = self.metric_avg)
-					lr_prec = prec_score(self.y_test, y_pred, average = self.metric_avg)
-					lr_recall = recall_score(self.y_test, y_pred, average = self.metric_avg)
+				lr_prec = prec_score(self.y_test, y_pred, average = self.metric_avg)
+				lr_recall = recall_score(self.y_test, y_pred, average = self.metric_avg)
 
 				#LR Validation
 				probs = torch.nn.Softmax()(self.lr_model(self.x_valid))
@@ -383,11 +388,6 @@ class Joint_Learning:
 						best_score_gm_recall  = gm_recall
 						stop_early_lr = []
 						stop_early_gm = []
-					#checkpoint = {'theta': theta,'pi': pi}
-					# torch.save(checkpoint, save_folder+"/gm_"+str(epoch)    +".pt")
-					#checkpoint = {'params': self.lr_model.state_dict()}
-					# torch.save(checkpoint, save_folder+"/lr_"+ str(epoch)+".pt")
-					
 
 				if epoch > self.start_len and lr_valid_acc >= best_score_lr_val and lr_valid_acc >= best_score_gm_val:
 					if lr_valid_acc == best_score_lr_val or lr_valid_acc == best_score_gm_val:
@@ -420,11 +420,6 @@ class Joint_Learning:
 						best_score_gm_recall  = gm_recall
 						stop_early_lr = []
 						stop_early_gm = []
-					#checkpoint = {'theta': theta,'pi': pi}
-					# torch.save(checkpoint, save_folder+"/gm_"+str(epoch)    +".pt")
-					#checkpoint = {'params': self.lr_model.state_dict()}
-					# torch.save(checkpoint, save_folder+"/lr_"+ str(epoch)+".pt")
-
 
 				if len(stop_early_lr) > self.stop_len and len(stop_early_gm) > self.stop_len and (all(best_score_lr_val >= k for k in stop_early_lr) or \
 				all(best_score_gm_val >= k for k in stop_early_gm)):
@@ -450,7 +445,6 @@ class Joint_Learning:
 			final_score_gm_val.append(best_score_gm_val)
 			final_score_lr_val.append(best_score_lr_val)
 
-
 		print("===================================================")
 		print("TEST Averaged scores are for LR", np.mean(final_score_lr))
 		print("TEST Precision average scores are for LR", np.mean(final_score_lr_prec))
@@ -463,6 +457,9 @@ class Joint_Learning:
 		print("VALIDATION Averaged scores are for GM,LR", np.mean(final_score_gm_val), np.mean(final_score_lr_val))
 		print("TEST STD  are for GM,LR", np.std(final_score_gm), np.std(final_score_lr))
 		print("VALIDATION STD  are for GM,LR", np.std(final_score_gm_val), np.std(final_score_lr_val))
+
+		if path != None:
+			file.close()
 
 		return predict_gm(self.theta, self.pi, self.l_unsup, self.s_unsup, self.k, self.n_classes, self.continuous_mask, self.qc),\
 	 np.argmax((torch.nn.Softmax()(self.lr_model(self.x_unsup))).detach().numpy(), 1)
@@ -488,7 +485,7 @@ class Joint_Learning:
 	def predict_feature_model(self, x_test):
 		'''
 		Args:
-			x_test: numpy array of shape (num_instances, num_features), x_test[i][j] is jth feature of ith instance
+			x_test: numpy.ndarray of shape (num_instances, num_features), x_test[i][j] is jth feature of ith instance
 		Return: 
 			numpy.ndarray of shape (num_instances,) which are predicted labels by feature model 
 			[Note: no aggregration/algorithm-running will be done using the current input]

@@ -23,18 +23,25 @@ Joint Learning(JL)
 .. automodule:: Cage_JL.core_jl
 	:members:
 
-Models(feature based models for JL)
-====================================
+Others
+=======
+
+Feature-based Models
+---------------------
 .. automodule:: Cage_JL.models
 	:members:
 
-CAGE and JL common utils
-=========================
+CAGE utils
+-----------
+   From here on, Graphical model imply CAGE algorithm
+
+   JL uses these utils too
+
 .. automodule:: Cage_JL.utils
 	:members:
 
 JL utils
-==================
+---------
 .. automodule:: Cage_JL.utils_jl
 	:members:
 

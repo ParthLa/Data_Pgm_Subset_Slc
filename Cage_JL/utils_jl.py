@@ -4,8 +4,8 @@ import torch.nn as nn
 
 def log_likelihood_loss_supervised(theta, pi_y, pi, y, l, s, k, n_classes, continuous_mask, qc):
 	'''
-	Note:
 		Joint Learning utils: Negative log likelihood loss used in loss 4
+
 	Args:
 		theta: [n_classes, n_lfs], the parameters
 		pi: [n_classes, n_lfs], the parameters
@@ -25,8 +25,8 @@ def log_likelihood_loss_supervised(theta, pi_y, pi, y, l, s, k, n_classes, conti
 
 def entropy(probabilities):
 	'''
-	Note:
 		Joint Learning utils: Used in loss 2
+
 	Args:
 		probabilities: [num_unsup_instances, num_classes], probabilities[i][j] is probability of ith instance being jth class
 	Return:
@@ -37,8 +37,8 @@ def entropy(probabilities):
 
 def kl_divergence(probs_p, probs_q):
 	'''
-	Note:
 		Joint Learning utils: KL divergence of two probabilities, used in loss 6
+		
 	Args:
 		probs_p: [num_instances, num_classes]
 		probs_q: [num_instances, num_classes]

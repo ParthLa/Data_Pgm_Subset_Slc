@@ -12,25 +12,24 @@ class Cage:
 	Cage class:
 		Class for Data Programming using CAGE
 		[Note: from here on, graphical model imply CAGE algorithm]
+
+	Args:
+		n_classes: Number of classes/labels, type is integer
+		path: Path to pickle file of input data
+		metric_avg: List of average metric to be used in calculating f1_score, default is 'binary'
+		n_epochs:Number of epochs, default is 100
+		lr: Learning rate for torch.optim, default is 0.01
+		n_lfs: Number of LFs
+		qt: Quality guide of shape (n_lfs,) and type numpy.ndarray OR a float. Values must be between 0 and 1
+		qc: Quality index of shape (n_lfs,) and type numpy.ndarray OR a float. Values must be between 0 and 1
+
 	'''
-	def __init__(self, n_classes, path, metric_avg = 'binary', n_epochs = 100, lr = 0.01, n_lfs = None, qt = None, qc = None):
-		'''
-		Args:
-			n_classes: Number of classes/labels, type is integer
-			path: Path to pickle file of input data
-			metric_avg: Average metric to be used in calculating f1_score, default is 'binary'
-			n_epochs:Number of epochs, default is 100
-			lr: Learning rate for torch.optim, default is 0.01
-			n_lfs: Number of LFs
-			qt: Quality guide of shape (n_lfs,) and type numpy.ndarray OR a float. Values must be between 0 and 1
-			qc: Quality index of shape (n_lfs,) and type numpy.ndarray OR a float. Values must be between 0 and 1
-		Return:
-			no return value
-	'''
+	def __init__(self, n_classes, path, metric_avg = ['binary'], n_epochs = 100, lr = 0.01, n_lfs = None, qt = None, qc = None):
 		assert type(n_classes) == np.int or type(n_classes) == np.float
 		assert type(path) == str
 		assert os.path.exists(path)
-		assert metric_avg in ['micro', 'macro', 'samples','weighted', 'binary'] or metric_avg is None
+		for temp in metric_avg:
+			assert temp in ['micro', 'macro', 'samples','weighted', 'binary'] or metric_avg is None
 		assert type(n_epochs) == np.int or type(n_epochs) == np.float
 		assert type(lr) == np.int or type(lr) == np.float
 		if n_lfs != None:
@@ -77,7 +76,7 @@ class Cage:
 		self.s[self.s < 0.001] = 0.001 # clip s
 
 		self.n_classes = int(n_classes)
-		self.metric_avg = metric_avg
+		self.metric_avg = list(set(metric_avg))
 		self.n_epochs = int(n_epochs)
 		self.lr = lr
 		self.n_lfs = n_lfs if n_lfs != None else self.l.shape[1]
@@ -109,8 +108,13 @@ class Cage:
 		Return:
 			numpy.ndarray of shape (num_instances,) which are aggregated/predicted labels
 		'''
+		use_cuda = torch.cuda.is_available()
+		device = torch.device("cuda:0" if use_cuda else "cpu")
+		torch.backends.cudnn.benchmark = True
+
 		optimizer = optim.Adam([self.theta, self.pi], lr=self.lr, weight_decay=0)
 
+		file = None
 		if path != None:
 			file = open(path, "a+")
 
@@ -123,7 +127,8 @@ class Cage:
 			if path != None:
 				y_pred = predict(s_test, m_test)
 				file.write("Epoch: {}\taccuracy_score: {}".format(epoch, accuracy_score(y_true_test, y_pred)))
-				file.write("Epoch: {}\tf1_score: {}".format(epoch, f1_score(y_true_test, y_pred, average = self.metric_avg)))
+				for temp in self.metric_avg:
+					file.write("Epoch: {}\tmetric_avg: {}\tf1_score: {}".format(epoch, temp, f1_score(y_true_test, y_pred, average = temp)))
 
 			loss.backward()
 			optimizer.step()

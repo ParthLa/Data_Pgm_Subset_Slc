@@ -6,12 +6,9 @@ from torch.distributions.beta import Beta
 
 def get_data(path):
 	'''
-	Args: 
-		path: path to pickle file with data in the format below
-	Note:
 		expected order in pickle file is NUMPY ndarrays x, l, m, L, d, r, s, n, k
 			x: (num_instances, num_features), x[i][j] is jth feature of ith instance
-
+			
 			l: (num_instances, num_rules), l[i][j] is the prediction of jth LF on ith instance. l[i][j] = num_classes imply Abstain
 			
 			m: (num_instances, num_rules), m[i][j] is 1 if jth LF didn't Abstain on ith instance. Else it is 0
@@ -27,6 +24,10 @@ def get_data(path):
 			n: (num_rules,), n[i] is 1 if ith LF has continuous counter part, else it is 0
 			
 			k: (num_rules,), k[i] is the class of ith LF, range: 0 to num_classes-1
+
+	Args: 
+		path: path to pickle file with data in the format below
+
 	Return:
 		A list containing all the numpy arrays mentioned above
 	'''
@@ -48,8 +49,8 @@ def get_data(path):
 
 def phi(theta, l):
 	'''
-	Note:
-		Helper function
+		A helper function
+
 	Args:
 		theta: [n_classes, n_lfs], the parameters
 		l: [n_lfs]
@@ -61,8 +62,8 @@ def phi(theta, l):
 
 def calculate_normalizer(theta, k, n_classes):
 	'''
-	Note:
 		Graphical model utils: Used to find Z(the normaliser) in CAGE
+
 	Args:
 		theta: [n_classes, n_lfs], the parameters
 		k: [n_lfs], labels corresponding to LFs
@@ -79,8 +80,8 @@ def calculate_normalizer(theta, k, n_classes):
 
 def probability_l_y(theta, l, k, n_classes):
 	'''
-	Note:
 		Graphical model utils: Used to find probability involving the term psi_theta, the potential function for all LFs
+
 	Args:
 		theta: [n_classes, n_lfs], the parameters
 		l: [n_instances, n_lfs], l[i][j] is 1 if jth LF is triggered on ith instance, else it is 0
@@ -99,8 +100,8 @@ def probability_l_y(theta, l, k, n_classes):
 
 def probability_s_given_y_l(pi, s, y, l, k, continuous_mask, qc):
 	'''
-	Note:
 		Graphical model utils: Used to find probability involving the term psi_pi, the potential function for all continuous LFs
+
 	Args:
 		s: [n_instances, n_lfs], s[i][j] is the continuous score of ith instance given by jth continuous LF
 		y: a value in [0, n_classes-1], representing true label, for which psi_pi is calculated
@@ -124,8 +125,8 @@ def probability_s_given_y_l(pi, s, y, l, k, continuous_mask, qc):
 
 def probability(theta, pi, l, s, k, n_classes, continuous_mask, qc):
 	'''
-	Note:
 		Graphical model utils: Used to find probability of given instances for all possible y's
+
 	Args:
 		theta: [n_classes, n_lfs], the parameters
 		pi: [n_classes, n_lfs], the parameters
@@ -147,8 +148,8 @@ def probability(theta, pi, l, s, k, n_classes, continuous_mask, qc):
 
 def log_likelihood_loss(theta, pi, l, s, k, n_classes, continuous_mask, qc):
 	'''
-	Note:
 		Graphical model utils: negative of log likelihood loss
+
 	Args:
 		theta: [n_classes, n_lfs], the parameters
 		pi: [n_classes, n_lfs], the parameters
@@ -167,8 +168,8 @@ def log_likelihood_loss(theta, pi, l, s, k, n_classes, continuous_mask, qc):
 
 def precision_loss(theta, k, n_classes, a): 
 	'''
-	Note:
 		Graphical model utils: Precison loss, the R(theta) term in loss function
+
 	Args:
 		theta: [n_classes, n_lfs], the parameters
 		k: [n_lfs], k[i] is the class of ith LF, range: 0 to num_classes-1
@@ -195,8 +196,8 @@ def precision_loss(theta, k, n_classes, a):
 
 def predict_gm(theta, pi, l, s, k, n_classes, continuous_mask, qc):
 	'''
-	Note:
 		Graphical model utils: Used to predict the labels after the training is done
+
 	Args:
 		theta: [n_classes, n_lfs], the parameters
 		pi: [n_classes, n_lfs], the parameters
