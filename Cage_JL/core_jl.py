@@ -4,36 +4,54 @@ from torch.utils.data import TensorDataset, DataLoader
 import numpy as np
 
 from utils import *
-from model_feature import *
+from utils_jl import *
+from models import *
 
 
 class Joint_Learning:
 	'''
-	Joint Learning class
-	constructor args:
-	n_classes: number of classes/labels, type is integer
-	path_L: path to pickle file of labelled instances
-	path_U: path to pickle file of unlabelled instances
-	path_V: path to pickle file of validation instances
-	path_T: path to pickle file of test instances
-	(Note: each pickle file should follow the standard convention(can be found in __doc__ of get_data in utils.py) for data storage)
-	loss_func_mask: list/numpy array of size 7 or (7,) where loss_func_mask[i] should be 1 if Loss function (i+1) should be included, note Loss function 7 is quality guide(qt)
-	feature_model: the model intended to be used for features, allowed values are 'lr' or 'nn'
-	is_qt: True if quality guide is available. False if quality guide is intended to be found from validation instances
-	is_qc: True if qc is available. False if qc is intended to be found from validation instances
-	batch_size: batch size, type is integer
-	lr_feature: learning rate for feature model, type is integer or float
-	lr_gm: learning rate for graphical model(cage), type is integer or float
-	use_accuracy_score: True for accuracy_score, False for f1_score
-	metric_avg: average metric to be used in calculating f1_score/precision/recall
-	qt: quality guide of shape (n_lfs,) and type numpy OR a float. Values must be between 0 and 1.
-	qc: average score of s when there is an aggrement of shape (n_lfs,) and type numpy OR a float. Values must be between 0 and 1.
-	n_hidden: the number of hidden layer nodes if feature model is 'nn', type is integer
-	n_epochs: number of epochs in each run, type is integer
-	n_runs: number of runs ,type is integer
+	Joint_Learning class:
+		Class for Joint Learning algorithm
+		[Note: from here on, feature model is short for feature-based classification model and graphical model imply CAGE algorithm]
 	'''
-	def __init__(self, n_classes, path_L, path_U, path_V, path_T , loss_func_mask, feature_model, is_qt, is_qc, batch_size, lr_feature, lr_gm, use_accuracy_score, metric_avg = 'macro', qt = None, qc = None, n_hidden = 512, n_epochs = 100, n_runs = 10):
-		
+	def __init__(self, n_classes, path_L, path_U, path_V, path_T , loss_func_mask, is_qt, is_qc, batch_size, lr_feature, lr_gm,\
+	 use_accuracy_score, feature_model = 'nn', metric_avg = 'macro', qt = None, qc = None, n_hidden = 512, n_epochs = 100, n_runs = 10, start_len = 5, stop_len = 10):
+		'''
+		Args:
+			n_classes: Number of classes/labels, type is integer
+			path_L: Path to pickle file of labelled instances
+			path_U: Path to pickle file of unlabelled instances
+			path_V: Path to pickle file of validation instances
+			path_T: Path to pickle file of test instances
+			[Note: each pickle file should follow the standard convention for data storage]
+			loss_func_mask: list/numpy array of size 7 or (7,) where loss_func_mask[i] should be 1 if Loss function (i+1) should be included
+			[Note: Loss function number, Calculated over, Loss function:
+					1, L, Cross Entropy(prob_from_feature_model, true_labels)
+					2, U, Entropy(prob_from_feature_model)
+					3, U, Cross Entropy(prob_from_feature_model, prob_from_graphical_model)
+					4, L, Negative Log Likelihood
+					5, U, Negative Log Likelihood(marginalised over true labels)
+					6, L and U, KL Divergence(prob_feature_model, prob_graphical_model)
+					7, Quality guide
+			]
+			is_qt: True if quality guide is available. False if quality guide is intended to be found from validation instances
+			is_qc: True if quality index is available. False if quality index is intended to be found from validation instances
+			batch_size: Batch size, type should be integer
+			lr_feature: Learning rate for feature model, type is integer or float
+			lr_gm: Learning rate for graphical model(cage), type is integer or float
+			use_accuracy_score: The score to use for termination condition on validation set. True for accuracy_score, False for f1_score
+			feature_model: The model intended to be used for features, allowed values are 'lr' or 'nn' string, default is 'nn'
+			metric_avg: Average metric to be used in calculating f1_score/precision/recall, default is 'macro'
+			qt: Quality guide of shape (n_lfs,) and type numpy.ndarray OR a float. Values must be between 0 and 1
+			qc: Quality index of shape (n_lfs,) and type numpy.ndarray OR a float. Values must be between 0 and 1
+			n_hidden: Number of hidden layer nodes if feature model is 'nn', type is integer, default value is 512
+			n_epochs: Number of epochs in each run, type is integer, default value is 100
+			n_runs: Number of runs ,type is integer, default value is 10
+			start_len: A parameter used in validation, type is integer, default is 5
+			stop_len: A parameter used in validation, type is integer, default is 10
+		Return:
+			no return value
+	'''
 		assert type(n_classes) == np.int or type(n_classes) == np.float
 		assert type(path_L) == str and type(path_V) == str and type(path_V) == str and type(path_T) == str and type(metric_avg) == str
 		assert os.path.exists(path_L) and os.path.exists(path_U) and os.path.exists(path_V) and os.path.exists(path_T)
@@ -71,6 +89,8 @@ class Joint_Learning:
 		assert type(n_hidden) == np.int or type(n_hidden) == np.float
 		assert type(n_epochs) == np.int or type(n_epochs) == np.float
 		assert type(n_runs) == np.int or type(n_runs) == np.float
+		assert type(start_len) == np.int or type(start_len) == np.float
+		assert type(stop_len) == np.int or type(stop_len) == np.float
 
 		torch.set_default_dtype(torch.float64)
 		self.n_classes = int(n_classes)
@@ -84,6 +104,10 @@ class Joint_Learning:
 		self.metric_avg = metric_avg
 		self.n_epochs = int(n_epochs)
 		self.n_runs = int(n_runs)
+		self.start_len = int(start_len)
+		self.stop_len = int(stop_len)
+
+		assert self.start_len <= self.n_epochs and self.stop_len <= self.n_epochs
 
 		if self.use_accuracy_score:
 			from sklearn.metrics import accuracy_score as score
@@ -106,7 +130,7 @@ class Joint_Learning:
 		excluding = []
 		temp_index = 0
 		for temp in data_U[1]:
-			if(np.all(x == int(self.n_classes)) ):
+			if(np.all(temp == int(self.n_classes)) ):
 				excluding.append(index_temp)
 			index_temp+=1
 
@@ -129,6 +153,26 @@ class Joint_Learning:
 		self.k = torch.tensor(data_L[8]).long() # LF's classes
 		self.n_lfs = self.l_sup.shape[1]
 		self.continuous_mask = torch.tensor(data_L[7]).double() # Mask for s/continuous_mask
+
+		'''
+		shapes of x,y,l,s:
+			x: [num_instances, num_features], feature matrix
+			y: [num_instances, 1], true labels, if available
+			l: [num_instances, num_rules], 1 if LF is triggered, 0 else
+			s: [num_instances, num_rules], continuous score
+		'''
+
+		assert self.x_sup.shape[1] == self.n_features and self.x_unsup.shape[1] == self.n_features \
+		 and self.x_valid.shape[1] == self.n_features and self.x_test.shape[1] == self.n_features
+
+		assert self.x_sup.shape[0] == self.y_sup.shape[0] and self.x_sup.shape[0] == self.l_sup.shape[0]\
+		 and self.l_sup.shape == self.s_sup.shape and self.l_sup.shape[1] == self.n_lfs
+		assert self.x_unsup.shape[0] == self.y_unsup.shape[0] and self.x_unsup.shape[0] == self.l_unsup.shape[0]\
+		 and self.l_unsup.shape == self.s_unsup.shape and self.l_unsup.shape[1] == self.n_lfs
+		assert self.x_valid.shape[0] == self.y_valid.shape[0] and self.x_valid.shape[0] == self.l_valid.shape[0]\
+		 and self.l_valid.shape == self.s_valid.shape and self.l_valid.shape[1] == self.n_lfs
+		assert self.x_test.shape[0] == self.y_test.shape[0] and self.x_test.shape[0] == self.l_test.shape[0]\
+		 and self.l_test.shape == self.s_test.shape and self.l_test.shape[1] == self.n_lfs
 
 		if is_qt:
 			self.qt = torch.tensor(qt).double() if qt != None and type(qt) == np.ndarray else \
@@ -165,34 +209,37 @@ class Joint_Learning:
 		self.supervised_mask = torch.cat([torch.ones(l_sup.shape[0]), torch.zeros(l_unsup.shape[0])])
 
 		self.pi = torch.ones((self.n_classes, self.n_lfs)).double()
-		self.theta = torch.ones((self.n_classes, self.n_lfs)).double() * 1
-		self.pi_y = torch.ones(self.n_classes).double()
+		self.theta = torch.ones((self.n_classes, self.n_lfs)).double()
 
 		if self.feature_model == 'lr':
 			self.lr_model = LogisticRegression(self.n_features, self.n_classes)
 		elif self.feature_model =='nn':
 			self.lr_model = DeepNet(n_features, self.n_hidden, self.n_classes)
 
-	def fit(self):
+	def fit(self, path):
 		'''
-		no input args
-		return: two predicted labels of numpy array of shape (num_instances,). first one is through gm(cage), other one through feature model
+		Args:
+			path: Path to log file
+		Return: 
+			Two predicted labels of numpy array of shape (num_instances,). first one is through graphical model, other one through feature model
 		'''
+
+		use_cuda = torch.cuda.is_available()
+		device = torch.device("cuda:0" if use_cuda else "cpu")
+		torch.backends.cudnn.benchmark = True
+
 		final_score_gm, final_score_lr, final_score_gm_val, final_score_lr_val = [],[],[],[]
 		final_score_lr_prec, final_score_lr_recall, final_score_gm_prec, final_score_gm_recall = [],[],[],[]
-		for lo in range(0,self.n_runs):
+		for run in range(0,self.n_runs):
 			self.pi = torch.ones((self.n_classes, self.n_lfs)).double()
 			(self.pi).requires_grad = True
 
 			self.theta = torch.ones((self.n_classes, self.n_lfs)).double() * 1
 			(self.theta).requires_grad = True
 
-			self.pi_y = torch.ones(self.n_classes).double()
-			(self.pi_y).requires_grad = True
-			
-			optimizer = torch.optim.Adam([{"params": self.lr_model.parameters()}, {"params": [self.pi, self.pi_y, self.theta]}], lr=0.001)
+			optimizer = torch.optim.Adam([{"params": self.lr_model.parameters()}, {"params": [self.pi, self.theta]}], lr=0.001)
 			optimizer_lr = torch.optim.Adam(self.lr_model.parameters(), lr = self.lr_feature)
-			optimizer_gm = torch.optim.Adam([self.theta, self.pi, self.pi_y], lr = self.lr_gm, weight_decay=0)
+			optimizer_gm = torch.optim.Adam([self.theta, self.pi], lr = self.lr_gm, weight_decay=0)
 			supervised_criterion = torch.nn.CrossEntropyLoss()
 
 			dataset = TensorDataset(self.x_train, self.y_train, self.l, self.s, self.supervised_mask)
@@ -202,7 +249,7 @@ class Joint_Learning:
 			best_score_lr,best_score_gm,best_epoch_lr,best_epoch_gm,best_score_lr_val, best_score_gm_val = 0,0,0,0,0,0
 			best_score_lr_prec,best_score_lr_recall ,best_score_gm_prec,best_score_gm_recall= 0,0,0,0
 
-			stop_early, stop_early_gm = [], []
+			stop_early_lr, stop_early_gm = [], []
 
 			for epoch in range(self.n_epochs):
 				self.lr_model.train()
@@ -214,9 +261,8 @@ class Joint_Learning:
 					unsup = []
 					sup = []
 					supervised_indices = sample[4].nonzero().view(-1)
-					# unsupervised_indices = indices  ## Uncomment for entropy
+					# unsupervised_indices = indices  # Uncomment for entropy
 					unsupervised_indices = (1-sample[4]).nonzero().squeeze()
-
 
 					if(self.loss_func_mask[0]):
 						if len(supervised_indices) > 0:
@@ -233,33 +279,32 @@ class Joint_Learning:
 						loss_2=0
 
 					if(self.loss_func_mask[2]):
-						y_pred_unsupervised = pred_gm(self.theta, self.pi_y, self.pi, sample[2][unsupervised_indices], sample[3][unsupervised_indices], self.k, self.n_classes, self.continuous_mask, self.qc)
+						y_pred_unsupervised = predict_gm(self.theta, self.pi, sample[2][unsupervised_indices], sample[3][unsupervised_indices], self.k, self.n_classes, self.continuous_mask, self.qc)
 						loss_3 = supervised_criterion(self.lr_model(sample[0][unsupervised_indices]), torch.tensor(y_pred_unsupervised))
 					else:
 						loss_3 = 0
 
 					if (self.loss_func_mask[3] and len(supervised_indices) > 0):
-						loss_4 = log_likelihood_loss_supervised(self.theta, self.pi_y, self.pi, sample[1][supervised_indices], sample[2][supervised_indices], sample[3][supervised_indices], self.k, self.n_classes, self.continuous_mask, self.qc)
+						loss_4 = log_likelihood_loss_supervised(self.theta, self.pi, sample[1][supervised_indices], sample[2][supervised_indices], sample[3][supervised_indices], self.k, self.n_classes, self.continuous_mask, self.qc)
 					else:
 						loss_4 = 0
 
 					if(self.loss_func_mask[4]):
-						loss_5 = log_likelihood_loss(self.theta, self.pi_y, self.pi, sample[2][unsupervised_indices], sample[3][unsupervised_indices], self.k, self.n_classes, self.continuous_mask, self.qc)
+						loss_5 = log_likelihood_loss(self.theta, self.pi, sample[2][unsupervised_indices], sample[3][unsupervised_indices], self.k, self.n_classes, self.continuous_mask, self.qc)
 					else:
 						loss_5 =0
 
 					if(self.loss_func_mask[5]):
 						if(len(supervised_indices) >0):
 							supervised_indices = supervised_indices.tolist()
-							probs_graphical = probability(self.theta, self.pi_y, self.pi, torch.cat([sample[2][unsupervised_indices], sample[2][supervised_indices]]),\
+							probs_graphical = probability(self.theta, self.pi, torch.cat([sample[2][unsupervised_indices], sample[2][supervised_indices]]),\
 							torch.cat([sample[3][unsupervised_indices],sample[3][supervised_indices]]), self.k, self.n_classes, self.continuous_mask, self.qc)
 						else:
-							probs_graphical = probability(self.theta, self.pi_y, self.pi,sample[2][unsupervised_indices],sample[3][unsupervised_indices],\
+							probs_graphical = probability(self.theta, self.pi,sample[2][unsupervised_indices],sample[3][unsupervised_indices],\
 								self.k, self.n_classes, self.continuous_mask, self.qc)
 						probs_graphical = (probs_graphical.t() / probs_graphical.sum(1)).t()
 						probs_lr = torch.nn.Softmax()(self.lr_model(sample[0]))
-						#loss_6 = kl_divergence(probs_lr, probs_graphical) # todo: include experiment?
-						loss_6 = kl_divergence(probs_graphical, probs_lr) #original version
+						loss_6 = kl_divergence(probs_lr, probs_graphical)
 					else:
 						loss_6= 0
 
@@ -275,7 +320,7 @@ class Joint_Learning:
 						optimizer_lr.step()
 
 				#gm Test
-				y_pred = pred_gm(self.theta, self.pi_y, self.pi, self.l_test, self.s_test, self.k, self.n_classes, self.continuous_mask, self.qc)
+				y_pred = predict_gm(self.theta, self.pi, self.l_test, self.s_test, self.k, self.n_classes, self.continuous_mask, self.qc)
 				if self.use_accuracy_score:
 					gm_acc = score(self.y_test, y_pred)
 				else:
@@ -284,7 +329,7 @@ class Joint_Learning:
 					gm_recall = recall_score(self.y_test, y_pred, average = self.metric_avg)
 
 				#gm Validation
-				y_pred = pred_gm(self.theta, self.pi_y, self.pi, self.l_valid, self.s_valid, self.k, self.n_classes, self.continuous_mask, self.qc)
+				y_pred = predict_gm(self.theta, self.pi, self.l_valid, self.s_valid, self.k, self.n_classes, self.continuous_mask, self.qc)
 				if self.use_accuracy_score:
 					gm_valid_acc = score(self.y_valid, y_pred)
 				else:
@@ -308,7 +353,7 @@ class Joint_Learning:
 				else:
 					lr_valid_acc = score(self.y_valid, y_pred, average = self.metric_avg)
 
-				if epoch > 5 and gm_valid_acc >= best_score_gm_val and gm_valid_acc >= best_score_lr_val:
+				if epoch > self.start_len and gm_valid_acc >= best_score_gm_val and gm_valid_acc >= best_score_lr_val:
 					if gm_valid_acc == best_score_gm_val or gm_valid_acc == best_score_lr_val:
 						if best_score_gm < gm_acc or best_score_lr < lr_acc:
 							best_epoch_lr = epoch
@@ -336,7 +381,7 @@ class Joint_Learning:
 						best_score_lr_recall  = lr_recall
 						best_score_gm_prec = gm_prec
 						best_score_gm_recall  = gm_recall
-						stop_early = []
+						stop_early_lr = []
 						stop_early_gm = []
 					#checkpoint = {'theta': theta,'pi': pi}
 					# torch.save(checkpoint, save_folder+"/gm_"+str(epoch)    +".pt")
@@ -344,7 +389,7 @@ class Joint_Learning:
 					# torch.save(checkpoint, save_folder+"/lr_"+ str(epoch)+".pt")
 					
 
-				if epoch > 5 and lr_valid_acc >= best_score_lr_val and lr_valid_acc >= best_score_gm_val:
+				if epoch > self.start_len and lr_valid_acc >= best_score_lr_val and lr_valid_acc >= best_score_gm_val:
 					if lr_valid_acc == best_score_lr_val or lr_valid_acc == best_score_gm_val:
 						if best_score_lr < lr_acc or best_score_gm < gm_acc:
 							
@@ -364,14 +409,16 @@ class Joint_Learning:
 						best_epoch_lr = epoch
 						best_score_lr_val = lr_valid_acc
 						best_score_lr = lr_acc
+
 						best_epoch_gm = epoch
 						best_score_gm_val = gm_valid_acc
 						best_score_gm = gm_acc
 						best_score_lr_prec = lr_prec
+
 						best_score_lr_recall  = lr_recall
 						best_score_gm_prec = gm_prec
 						best_score_gm_recall  = gm_recall
-						stop_early = []
+						stop_early_lr = []
 						stop_early_gm = []
 					#checkpoint = {'theta': theta,'pi': pi}
 					# torch.save(checkpoint, save_folder+"/gm_"+str(epoch)    +".pt")
@@ -379,19 +426,19 @@ class Joint_Learning:
 					# torch.save(checkpoint, save_folder+"/lr_"+ str(epoch)+".pt")
 
 
-				if len(stop_early) > 10 and len(stop_early_gm) > 10 and (all(best_score_lr_val >= k for k in stop_early) or \
+				if len(stop_early_lr) > self.stop_len and len(stop_early_gm) > self.stop_len and (all(best_score_lr_val >= k for k in stop_early_lr) or \
 				all(best_score_gm_val >= k for k in stop_early_gm)):
 					print('Early Stopping at', best_epoch_gm, best_score_gm, best_score_lr)
 					print('Validation score Early Stopping at', best_epoch_gm, best_score_lr_val, best_score_gm_val)
 					break
 				else:
-					stop_early.append(lr_valid_acc)
+					stop_early_lr.append(lr_valid_acc)
 					stop_early_gm.append(gm_valid_acc)
 
 			print('Best Epoch LR', best_epoch_lr)
 			print('Best Epoch GM', best_epoch_gm)
-			print("Run \t",lo, "Epoch, GM, LR \t", best_score_gm, best_score_lr)
-			print("Run \t",lo, "GM Val, LR Val \t", best_score_gm_val, best_score_lr_val)
+			print("Run \t", run, "Epoch, GM, LR \t", best_score_gm, best_score_lr)
+			print("Run \t", run, "GM Val, LR Val \t", best_score_gm_val, best_score_lr_val)
 			final_score_gm.append(best_score_gm)
 			final_score_lr.append(best_score_lr)
 			final_score_lr_prec.append(best_score_lr_prec)
@@ -417,41 +464,34 @@ class Joint_Learning:
 		print("TEST STD  are for GM,LR", np.std(final_score_gm), np.std(final_score_lr))
 		print("VALIDATION STD  are for GM,LR", np.std(final_score_gm_val), np.std(final_score_lr_val))
 
-		return pred_gm(self.theta, self.pi_y, self.pi, self.l_unsup, self.s_unsup, self.k, self.n_classes, self.continuous_mask, self.qc),\
+		return predict_gm(self.theta, self.pi, self.l_unsup, self.s_unsup, self.k, self.n_classes, self.continuous_mask, self.qc),\
 	 np.argmax((torch.nn.Softmax()(self.lr_model(self.x_unsup))).detach().numpy(), 1)
 
-	def predict_gm(self, l_test = None, s_test, m_test = None):
+	def predict_cage_model(self, s_test, m_test):
 		'''
-		input args:
-		l_test = None, s_test, m_test = None: numpy arrays of shape (num_instances, num_rules). l_test is matrix of predicted labels. m_test is matrix of triggered LFs
-		return: numpy array of shape (num_instances,) which are predicted labels
-		(Note: no aggregration/algorithm-running will be done using the current input)
+		Args:
+			s_test: numpy arrays of shape (num_instances, num_rules), s_test[i][j] is the continuous score of jth LF on ith instance
+			m_test: numpy arrays of shape (num_instances, num_rules), m_test[i][j] is 1 if jth LF is triggered on ith instance, else it is 0
+		Return:
+			numpy.ndarray of shape (num_instances,) which are predicted labels using graphical model 
+			[Note: no aggregration/algorithm-running will be done using the current input]
 		'''
 		s_temp = torch.tensor(s_test).double()
 		s_temp[s_temp > 0.999] = 0.999
 		s_temp[s_temp < 0.001] = 0.001
-		if m_test != None:
-			assert m_test.shape == s_test.shape
-			assert m_test.shape[1] == self.n_lfs
+		assert m_test.shape == s_test.shape
+		assert m_test.shape[1] == self.n_lfs
+		assert np.all(np.logical_or(m_test == 1 or m_test == 0))
+		m_temp = torch.abs(torch.tensor(m_test).long())
+		return predict_gm(self.theta, self.pi, m_test, s_temp, self.k, self.n_classes, self.continuous_mask, self.qc)
 
-
-			return pred_gm(self.theta, self.pi_y, self.pi, m_test, s_temp, self.k, self.n_classes, self.continuous_mask, self.qc)
-		else:
-			assert l_test.shape == s_test.shape
-			assert l_test.shape[1] == self.n_lfs
-
-			l_temp = l_test
-			(l_temp)[l_temp == n_classes] = 0
-			(l_temp)[l_temp != n_classes] = 1
-			l_temp = torch.abs(torch.tensor(l_temp).long())
-			return pred_gm(self.theta, self.pi_y, self.pi, l_temp, s_temp, self.k, self.n_classes, self.continuous_mask, self.qc)
-
-	def predict_feature(self, x_test):
+	def predict_feature_model(self, x_test):
 		'''
-		input args:
-		x_test: numpy array of shape (num_instances, num_features)
-		return: numpy array of shape (num_instances,) which are predicted labels by feature model
-		(Note: no aggregration/algorithm-running will be done using the current input)
+		Args:
+			x_test: numpy array of shape (num_instances, num_features), x_test[i][j] is jth feature of ith instance
+		Return: 
+			numpy.ndarray of shape (num_instances,) which are predicted labels by feature model 
+			[Note: no aggregration/algorithm-running will be done using the current input]
 		'''
 		return np.argmax((torch.nn.Softmax()(self.lr_model(x_test))).detach().numpy(), 1)
 

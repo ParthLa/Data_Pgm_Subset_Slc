@@ -3,31 +3,41 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to Edurevol's documentation!
-====================================
+Welcome to SPEAR(DECILE) documentation!
+========================================
 
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
 
-Edurevol Main
-=========================
-
-.. automodule:: docs_test
-	:members:
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
-
 Labelling(Vineeth and Harshad)
 ================================
 
-Guttu
+CAGE
 ==================
+.. automodule:: Cage_JL.core_cage
+	:members:
+
+Joint Learning(JL)
+==================
+.. automodule:: Cage_JL.core_jl
+	:members:
+
+Models(feature based models for JL)
+====================================
+.. automodule:: Cage_JL.models
+	:members:
+
+CAGE and JL common utils
+=========================
+.. automodule:: Cage_JL.utils
+	:members:
+
+JL utils
+==================
+.. automodule:: Cage_JL.utils_jl
+	:members:
+
 
 Parth
 ===================
