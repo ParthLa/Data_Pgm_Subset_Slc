@@ -13,7 +13,7 @@ def load_data_to_numpy(file_name="dataset/SMSSpamCollection"):
                 y=1
             else:
                 y=0
-            x = yx[1].lower().strip()
+            x = yx[1]
             X.append(x)
             Y.append(y)
     

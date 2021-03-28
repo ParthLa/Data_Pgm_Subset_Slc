@@ -12,7 +12,6 @@ Welcome to SPEAR(DECILE) documentation!
 
 Labelling(Vineeth and Harshad)
 ================================
-
 CAGE
 ==================
 .. automodule:: Cage_JL.core_cage
@@ -26,6 +25,22 @@ Joint Learning(JL)
 Others
 =======
 
+<<<<<<< HEAD
+Labeling(Vineeth and Harshad)
+================================
+
+LFApply
+-------------
+.. automodule:: labeling.apply.core
+	:members: 
+
+LFAnalysis
+-------------
+.. automodule:: labeling.analysis.core
+	:members: LFAnalysis
+
+Guttu
+==================
 Feature-based Models
 ---------------------
 .. automodule:: Cage_JL.models
