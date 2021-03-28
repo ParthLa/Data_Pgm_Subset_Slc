@@ -9,6 +9,14 @@ import pickle
 import numpy as np
 
 class NoisyLabels:
+    """Generate noisy lables, continuous score  from lf's applied on data  
+
+    Args:
+        name (str): Name for this object.
+        data (DataPoints): Datapoints.
+        gold_labels (Optional[DataPoints]): Labels for datapoints if available.
+        rules (LFSet): Set of Rules to generate noisy labels for the dataset.
+    """    
     def __init__(
         self,
         name: str,
@@ -17,12 +25,6 @@ class NoisyLabels:
         rules: LFSet,
     ) -> None:
         """Instantiates NoisyLabels class with dataset and set of LFs to noisily label the dataset
-
-        Args:
-            name (str): Name for this object.
-            data (DataPoints): Datapoints.
-            gold_labels (Optional[DataPoints]): Labels for datapoints if available.
-            rules (LFSet): Set of Rules to generate noisy labels for the dataset.
         """
         self.name = name
         self._data = data

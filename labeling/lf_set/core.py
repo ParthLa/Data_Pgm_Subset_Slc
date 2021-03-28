@@ -9,17 +9,17 @@ import numpy as np
 
 class LFSet:              # LFSet
     """Class for Set of Labeling Functions
+
+    Args:
+        name (str): Name for this LFset.
+        lfs (List[LabelingFunction], optional): List of LFs to add to this object. Defaults to [].
     """
     def __init__(
         self,
         name: str,
         lfs: List[LabelingFunction] = [],
     ) -> None:
-        """Instantiates LFSet class with list of labeling functions
-
-        Args:
-            name (str): Name for this LFset.
-            lfs (List[LabelingFunction], optional): List of LFs to add to this object. Defaults to [].
+        """Instantiates LFSet class with list of labeling functions      
         """
         self.name = name
         self._lfs = set(lfs)

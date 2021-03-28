@@ -4,6 +4,11 @@ from labeling.types import DataPoint
 
 class BaseContinuousScorer:
     """Base Class for Continuous Scoring function used by the Labeling Function
+
+    Args:
+        name (str): Name of the continuous scoring function
+        cf (Callable[..., int]): Core function which calculates continuous score
+        resources (Optional[Mapping[str, Any]], optional): Resources for the scorer. Defaults to None.
     """
     def __init__(
         self,
@@ -13,11 +18,6 @@ class BaseContinuousScorer:
         # pre: Optional[List[BasePreprocessor]] = None,
     ) -> None:
         """Instantiate the BaseContinuousScorer Class
-
-        Args:
-            name (str): Name of the continuous scoring function
-            cf (Callable[..., int]): Core function which calculates continuous score
-            resources (Optional[Mapping[str, Any]], optional): Resources for the scorer. Defaults to None.
         """
         self.name = name
         self._cf = cf
@@ -43,19 +43,21 @@ class BaseContinuousScorer:
         return f"{type(self).__name__} {self.name}"
 
 class continuous_scorer:
+    """Decorator class for continuous scoring.
+
+    Args:
+        name (Optional[str], optional): Name for the decorator. Defaults to None.
+        resources (Optional[Mapping[str, Any]], optional): Resources for the scorer. Defaults to None.
+
+    Raises:
+        ValueError: If decorator is missing parantheses.
+    """    
     def __init__(
         self,
         name: Optional[str] = None,
         resources: Optional[Mapping[str, Any]] = None,
     ) -> None:
         """Instantiates decorator for continuous scorer
-
-        Args:
-            name (Optional[str], optional): Name for the decorator. Defaults to None.
-            resources (Optional[Mapping[str, Any]], optional): Resources for the scorer. Defaults to None.
-
-        Raises:
-            ValueError: If decorator is missing parantheses.
         """
         if callable(name):
             raise ValueError("Looks like this decorator is missing parentheses!")

@@ -7,47 +7,69 @@ Welcome to SPEAR(DECILE) documentation!
 ========================================
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 5
    :caption: Contents:
 
-Labelling(Vineeth and Harshad)
+
+Labeling
 ================================
-CAGE
-==================
-.. automodule:: Cage_JL.core_cage
-	:members:
 
-Joint Learning(JL)
-==================
-.. automodule:: Cage_JL.core_jl
-	:members:
+LF
+------
+.. automodule:: labeling.lf.core
+	:members: LabelingFunction, labeling_function
 
-Others
-=======
-
-<<<<<<< HEAD
-Labeling(Vineeth and Harshad)
-================================
+Continuous scoring
+-------------------
+.. automodule:: labeling.continuous_scoring.core
+	:members: BaseContinuousScorer,continuous_scorer
 
 LFApply
 -------------
 .. automodule:: labeling.apply.core
 	:members: 
 
+LFSet
+------
+.. automodule:: labeling.lf_set.core
+	:members: LFSet
+
 LFAnalysis
 -------------
 .. automodule:: labeling.analysis.core
 	:members: LFAnalysis
 
-Guttu
+Noisy Labels
+---------------
+.. automodule:: labeling.noisy_labels.core
+	:members: NoisyLabels
+             
+
+CAGE
 ==================
+
+.. automodule:: Cage_JL.core_cage
+	:members:
+
+Joint Learning(JL)
+==================
+
+.. automodule:: Cage_JL.core_jl
+	:members:
+
+
+Others
+======
+
 Feature-based Models
 ---------------------
+
 .. automodule:: Cage_JL.models
 	:members:
 
 CAGE utils
 -----------
+
    From here on, Graphical model imply CAGE algorithm
 
    JL uses these utils too
@@ -57,6 +79,7 @@ CAGE utils
 
 JL utils
 ---------
+
 .. automodule:: Cage_JL.utils_jl
 	:members:
 

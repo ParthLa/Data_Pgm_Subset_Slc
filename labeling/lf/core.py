@@ -3,6 +3,16 @@ from labeling.types import DataPoint
 from labeling.preprocess import BasePreprocessor
 from labeling.continuous_scoring import BaseContinuousScorer
 class LabelingFunction:
+    """Base class for labeling function
+
+    Args:
+        name (str): name for this LF object
+        f (Callable[..., int]): core function which labels the input
+        label (int): Which class this LF corresponds to
+        resources (Optional[Mapping[str, Any]], optional): Additional resources for core function. Defaults to None.
+        pre (Optional[List[BasePreprocessor]], optional): Preprocessors to apply on input before labeling. Defaults to None.
+        cont_scorer (Optional[BaseContinuousScorer], optional): Continuous Scorer to calculate the confidence score. Defaults to None.
+    """    
     def __init__(
         self,
         name: str,
@@ -13,15 +23,6 @@ class LabelingFunction:
         cont_scorer: Optional[BaseContinuousScorer] = None,
     ) -> None:
         """Instatiates LabelingFunction class object
-
-        Args:
-            name (str): name for this LF object
-            f (Callable[..., int]): core function which labels the input
-            label (int): Which class this LF corresponds to
-            resources (Optional[Mapping[str, Any]], optional): Additional resources for core function. Defaults to None.
-            pre (Optional[List[BasePreprocessor]], optional): Preprocessors to apply on input before labeling. Defaults to None.
-            cont_scorer (Optional[BaseContinuousScorer], optional): Continuous Scorer to calculate the confidence score. Defaults to None.
-
         """
         self.name = name
         self._f = f
@@ -83,6 +84,18 @@ class LabelingFunction:
 
 
 class labeling_function:
+    """Decorator class for a labeling function
+    
+    Args:
+        name (Optional[str], optional): Name for this labeling function. Defaults to None.
+        label (Optional[int], optional): Which class this LF corresponds to. Defaults to None.
+        resources (Optional[Mapping[str, Any]], optional): Additional resources for the LF. Defaults to None.
+        pre (Optional[List[BasePreprocessor]], optional): Preprocessors to apply on input before labeling . Defaults to None.
+        cont_scorer (Optional[BaseContinuousScorer], optional): Continuous Scorer to calculate the confidence score. Defaults to None.
+
+    Raises:
+        ValueError: If the decorator is missing parantheses
+    """    
     def __init__(
         self,
         name: Optional[str] = None,
@@ -92,16 +105,6 @@ class labeling_function:
         cont_scorer: Optional[BaseContinuousScorer] = None,
     ) -> None:
         """Instatiates decorator for labeling function
-
-        Args:
-            name (Optional[str], optional): Name for this labeling function. Defaults to None.
-            label (Optional[int], optional): Which class this LF corresponds to. Defaults to None.
-            resources (Optional[Mapping[str, Any]], optional): Additional resources for the LF. Defaults to None.
-            pre (Optional[List[BasePreprocessor]], optional): Preprocessors to apply on input before labeling . Defaults to None.
-            cont_scorer (Optional[BaseContinuousScorer], optional): Continuous Scorer to calculate the confidence score. Defaults to None.
-
-        Raises:
-            ValueError: If the decorator is missing parantheses
         """
         if callable(name):
             raise ValueError("Looks like this decorator is missing parentheses!")
