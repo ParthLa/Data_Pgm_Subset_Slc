@@ -22,7 +22,7 @@ class LFSet:              # LFSet
         """Instantiates LFSet class with list of labeling functions      
         """
         self.name = name
-        self._lfs = set(lfs)
+        self._lfs = lfs
 
     def get_lfs(
         self,
@@ -46,7 +46,7 @@ class LFSet:              # LFSet
         if lf in self._lfs:
             warnings.warn('Attempting to add duplicate LF to LFset') 
         else:
-            self._lfs.add(lf)
+            self._lfs.append(lf)
     
     def add_lf_list(
         self,
@@ -57,9 +57,9 @@ class LFSet:              # LFSet
         Args:
             lf_list (List[LabelingFunction]): List of LFs to add to this LFSet
         """
-        if len(self._lfs.intersection(lf_list))>0:
+        if len(set(self._lfs).intersection(lf_list))>0:
             warnings.warn('Attempting to add duplicate LF to LFset') 
-        self._lfs = self._lfs.union(lf_list)
+        self._lfs = self._lfs + lf_list
     
     def remove_lf(
         self,

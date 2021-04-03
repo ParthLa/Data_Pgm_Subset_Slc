@@ -81,14 +81,14 @@ class BaseLFApplier:
 
 
 def apply_lfs_to_data_point(
-    x: DataPoint, index: int, lfs: Set[LabelingFunction], f_caller: _FunctionCaller
+    x: DataPoint, index: int, lfs: List[LabelingFunction], f_caller: _FunctionCaller
 ) -> RowData:
     """Label a single data point with a set of LFs
 
     Args:
         x (DataPoint): Data point to label
         index (int): Index of the data point
-        lfs (Set[LabelingFunction]): Set of LFs to label ``x`` with
+        lfs (List[LabelingFunction]): List of LFs to label ``x`` with
         f_caller (_FunctionCaller): A ``_FunctionCaller`` to record failed LF executions
 
     Returns:

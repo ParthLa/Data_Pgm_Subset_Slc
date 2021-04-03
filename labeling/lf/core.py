@@ -68,10 +68,11 @@ class LabelingFunction:
         x = self._preprocess_data_point(x)
         if self._cont_scorer is None:
             cs = -1.0
+            return self._f(x,**self._resources), cs 
         else:
             cs = self._cont_scorer(x,**self._resources)
-        dic = {"continuous_score": cs}
-        return self._f(x,**self._resources, **dic), cs                                   
+            dic = {"continuous_score": cs}
+            return self._f(x,**self._resources, **dic), cs                                   
         
     def __repr__(self) -> str:
         """Represents class object as string

@@ -11,7 +11,7 @@ import re
 
 SPAM = 1
 HAM = 0
-ABSTAIN = -1
+ABSTAIN = 2
 THRESHOLD = 0.8
 
 trigWord1 = {"free","credit","cheap","apply","buy","attention","shop","sex","soon","now","spam"}

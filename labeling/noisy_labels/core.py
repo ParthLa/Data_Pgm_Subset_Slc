@@ -16,6 +16,7 @@ class NoisyLabels:
         data (DataPoints): Datapoints.
         gold_labels (Optional[DataPoints]): Labels for datapoints if available.
         rules (LFSet): Set of Rules to generate noisy labels for the dataset.
+        exemplars (DataPoints): [description]
     """    
     def __init__(
         self,
@@ -23,7 +24,8 @@ class NoisyLabels:
         data: DataPoints,
         gold_labels: Optional[DataPoints],
         rules: LFSet,
-    ) -> None:
+        exemplars: DataPoints,
+    ) -> None:       
         """Instantiates NoisyLabels class with dataset and set of LFs to noisily label the dataset
         """
         self.name = name
@@ -32,6 +34,7 @@ class NoisyLabels:
         self._rules = rules
         self._L = None
         self._S = None
+        self._R = exemplars
 
     def get_labels(self):
         """Applies LFs to the dataset to generate noisy labels and returns noisy labels and confidence scores
@@ -62,7 +65,7 @@ class NoisyLabels:
             self._S = S
 
         num_inst=self._data.shape[0]
-        num_rules=self._L.shape[0]
+        num_rules=self._L.shape[1]
 
         x=self._data
         l=self._L
@@ -70,13 +73,24 @@ class NoisyLabels:
         m=(self._L>-1).astype(int)                                              # lf covers example or not 
         L=self._gold_labels                                                     # true labels
         d=np.ones((num_inst, 1))                                                # belongs to labeled data or not
-        r=np.zeros((num_inst, num_rules))                                       # exemplars
+        r=self._R                                                               # exemplars
 
         s=self._S                                                               # continuous scores
         n=np.array([lf._is_cont for lf in self._rules.get_lfs()], dtype=int)    # lf continuous or not
         k=np.array([lf._label for lf in self._rules.get_lfs()], dtype=int)      # lf associated to which class
 
-        to_dump = [x,l,m,L,d,r,s,n,k]
+        output = dict()
+        output["x"] = x
+        output["l"] = l
+        output["m"] = m
+        output["L"] = L
+        output["d"] = d
+        output["r"] = r
+        output["s"] = s
+        output["n"] = n
+        output["k"] = k
+        to_dump = [output]
+
         dump_to_pickle(filename, to_dump)
 
 

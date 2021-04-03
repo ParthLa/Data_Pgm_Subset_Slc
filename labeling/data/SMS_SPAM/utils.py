@@ -19,6 +19,8 @@ def load_data_to_numpy(file_name="dataset/SMSSpamCollection"):
     
     # X = np.array(X).reshape((len(X),1))
     # Y = np.array(Y).reshape((len(Y),1))
+    X = np.array(X)
+    Y = np.array(Y)
     return X,Y
 
 

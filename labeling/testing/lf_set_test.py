@@ -32,8 +32,7 @@ def lf1(x, **kwargs):
 @labeling_function(pre=[square], label=1)                # no continuous scorer specified
 def lf2(x, **kwargs):
     if np.linalg.norm(x['value']) < 1:
-        if (kwargs['continuous_score']==-1.0):
-            return 1
+        return 1
     return -1
 
 ## creating a RuleSet object with desired Labeling functions ##
