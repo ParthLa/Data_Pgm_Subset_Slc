@@ -12,7 +12,6 @@ from models import *
 class Joint_Learning:
 	'''
 	Joint_Learning class:
-		Class for Joint Learning algorithm
 		[Note: from here on, feature model is short for feature-based classification model and graphical model(gm) imply CAGE algorithm]
 	
 	Args:
@@ -32,9 +31,9 @@ class Joint_Learning:
 		metric_avg: Average metric to be used in calculating f1_score/precision/recall, default is 'macro'
 		qt: Quality guide of shape (n_lfs,) of type numpy.ndarray OR a float. Values must be between 0 and 1
 		qc: Quality index of shape (n_lfs,) of type numpy.ndarray OR a float. Values must be between 0 and 1
-		n_hidden: Number of hidden layer nodes if feature model is 'nn', type is integer, default value is 512
-		n_epochs: Number of epochs in each run, type is integer, default value is 100
-		n_runs: Number of runs ,type is integer, default value is 10
+		n_hidden: Number of hidden layer nodes if feature model is 'nn', type is integer, default is 512
+		n_epochs: Number of epochs in each run, type is integer, default is 100
+		n_runs: Number of runs ,type is integer, default is 10
 		start_len: A parameter used in validation, type is integer, default is 5
 		stop_len: A parameter used in validation, type is integer, default is 10
 	'''
@@ -215,13 +214,17 @@ class Joint_Learning:
 		elif self.feature_model =='nn':
 			self.lr_model = DeepNet(n_features, self.n_hidden, self.n_classes)
 
-	def fit(self, path = None):
+	def fit(self, return_gm = False, path = None):
 		'''
 		Args:
+			return_gm: Return the predictions of graphical model? the allowed values are True, False. Default value is False
 			path: Path to log file
 		Return: 
-			Two predicted labels of numpy array of shape (num_instances,). first one is through graphical model, other one through feature model
+			If return_gm is True; the return value is two predicted labels of numpy array of shape (num_instances,), first one is through graphical model, other one through feature model.
+			Else; the return value is predicted labels of numpy array of shape (num_instances,) through feature model
 		'''
+
+		assert type(return_gm) == np.bool
 
 		file = None
 		if path != None:
@@ -316,7 +319,7 @@ class Joint_Learning:
 					else:
 						prec_loss =0
 
-					loss = loss_1 + loss_2 + loss_3 + loss_4 + loss_6+loss_5 + prec_loss
+					loss = loss_1 + loss_2 + loss_3 + loss_4 + loss_6 + loss_5 + prec_loss
 					if loss != 0:
 						loss.backward()
 						optimizer_gm.step()
@@ -355,6 +358,11 @@ class Joint_Learning:
 					lr_valid_acc = score(self.y_valid, y_pred)
 				else:
 					lr_valid_acc = score(self.y_valid, y_pred, average = self.metric_avg)
+
+				if path != None:
+					file.write("Run: {}\tEpoch: {}\tgm_valid_acc: {}\tlr_valid_acc: {}".format(run, epoch, gm_valid_acc, lr_valid_acc))
+					if epoch % 10 == 0:
+						file.write("Run: {}\tEpoch: {}\tgm_test_acc: {}\tlr_test_acc: {}".format(run, epoch, gm_acc, lr_acc))
 
 				if epoch > self.start_len and gm_valid_acc >= best_score_gm_val and gm_valid_acc >= best_score_lr_val:
 					if gm_valid_acc == best_score_gm_val or gm_valid_acc == best_score_lr_val:
@@ -421,72 +429,97 @@ class Joint_Learning:
 
 				if len(stop_early_lr) > self.stop_len and len(stop_early_gm) > self.stop_len and (all(best_score_lr_val >= k for k in stop_early_lr) or \
 				all(best_score_gm_val >= k for k in stop_early_gm)):
-					print('Early Stopping at', best_epoch_gm, best_score_gm, best_score_lr)
-					print('Validation score Early Stopping at', best_epoch_gm, best_score_lr_val, best_score_gm_val)
+					#print('Early Stopping at', best_epoch_gm, best_score_gm, best_score_lr)
+					#print('Validation score Early Stopping at', best_epoch_gm, best_score_lr_val, best_score_gm_val)
 					break
 				else:
 					stop_early_lr.append(lr_valid_acc)
 					stop_early_gm.append(gm_valid_acc)
 
-			print('Best Epoch LR', best_epoch_lr)
-			print('Best Epoch GM', best_epoch_gm)
-			print("Run \t", run, "Epoch, GM, LR \t", best_score_gm, best_score_lr)
-			print("Run \t", run, "GM Val, LR Val \t", best_score_gm_val, best_score_lr_val)
+				#epoch for loop ended
+
+			# print('Best Epoch LR', best_epoch_lr)
+			# print('Best Epoch GM', best_epoch_gm)
+			# print("Run \t", run, "Epoch, GM, LR \t", best_score_gm, best_score_lr)
+			# print("Run \t", run, "GM Val, LR Val \t", best_score_gm_val, best_score_lr_val)
+
 			final_score_gm.append(best_score_gm)
+			final_score_gm_prec.append(best_score_gm_prec)
+			final_score_gm_recall.append(best_score_gm_recall)
+			final_score_gm_val.append(best_score_gm_val)
 			final_score_lr.append(best_score_lr)
 			final_score_lr_prec.append(best_score_lr_prec)
 			final_score_lr_recall.append(best_score_lr_recall)
-
-			final_score_gm_prec.append(best_score_gm_prec)
-			final_score_gm_recall.append(best_score_gm_recall)
-
-			final_score_gm_val.append(best_score_gm_val)
 			final_score_lr_val.append(best_score_lr_val)
 
-		print("===================================================")
-		print("TEST Averaged scores are for LR", np.mean(final_score_lr))
-		print("TEST Precision average scores are for LR", np.mean(final_score_lr_prec))
-		print("TEST Recall average scores are for LR", np.mean(final_score_lr_recall))
-		print("===================================================")
-		print("TEST Averaged scores are for GM",  np.mean(final_score_gm))
-		print("TEST Precision average scores are for GM", np.mean(final_score_gm_prec))
-		print("TEST Recall average scores are for GM", np.mean(final_score_gm_recall))
-		print("===================================================")
-		print("VALIDATION Averaged scores are for GM,LR", np.mean(final_score_gm_val), np.mean(final_score_lr_val))
-		print("TEST STD  are for GM,LR", np.std(final_score_gm), np.std(final_score_lr))
-		print("VALIDATION STD  are for GM,LR", np.std(final_score_gm_val), np.std(final_score_lr_val))
+		#run for loop ended
+
+		y_pred = predict_gm(self.theta, self.pi, self.l_test, self.s_test, self.k, self.n_classes, self.continuous_mask, self.qc)
+		if self.use_accuracy_score:
+			gm_acc = score(self.y_test, y_pred)
+		else:
+			gm_acc = score(self.y_test, y_pred, average = self.metric_avg)
+
+		probs = torch.nn.Softmax()(self.lr_model(self.x_test))
+		y_pred = np.argmax(probs.detach().numpy(), 1)
+		if self.use_accuracy_score:
+			lr_acc =score(self.y_test, y_pred)
+		else:
+			lr_acc =score(self.y_test, y_pred, average = self.metric_avg)
 
 		if path != None:
+			file.write("Training is done. gm_test_acc: {}\tlr_test_acc: {}".format(gm_acc, lr_acc))
+			# print("===================================================")
+			# print("TEST Averaged scores are for LR", np.mean(final_score_lr))
+			# print("TEST Precision average scores are for LR", np.mean(final_score_lr_prec))
+			# print("TEST Recall average scores are for LR", np.mean(final_score_lr_recall))
+			# print("===================================================")
+			# print("TEST Averaged scores are for GM",  np.mean(final_score_gm))
+			# print("TEST Precision average scores are for GM", np.mean(final_score_gm_prec))
+			# print("TEST Recall average scores are for GM", np.mean(final_score_gm_recall))
+			# print("===================================================")
+			# print("VALIDATION Averaged scores are for GM,LR", np.mean(final_score_gm_val), np.mean(final_score_lr_val))
+			# print("TEST STD  are for GM,LR", np.std(final_score_gm), np.std(final_score_lr))
+			# print("VALIDATION STD  are for GM,LR", np.std(final_score_gm_val), np.std(final_score_lr_val))
 			file.close()
 
-		return predict_gm(self.theta, self.pi, self.l_unsup, self.s_unsup, self.k, self.n_classes, self.continuous_mask, self.qc),\
-	 np.argmax((torch.nn.Softmax()(self.lr_model(self.x_unsup))).detach().numpy(), 1)
+		if return_gm:
+			return predict_gm(self.theta, self.pi, self.l_unsup, self.s_unsup, self.k, self.n_classes, self.continuous_mask, self.qc),\
+			 np.argmax((torch.nn.Softmax()(self.lr_model(self.x_unsup))).detach().numpy(), 1)
+		else:
+			return np.argmax((torch.nn.Softmax()(self.lr_model(self.x_unsup))).detach().numpy(), 1)
 
-	def predict_cage_model(self, s_test, m_test):
+	def predict_cage(self, path_test):
 		'''
+			Used to find the predicted labels based on the trained parameters of graphical model(CAGE)
+
 		Args:
-			s_test: numpy arrays of shape (num_instances, num_rules), s_test[i][j] is the continuous score of jth LF on ith instance
-			m_test: numpy arrays of shape (num_instances, num_rules), m_test[i][j] is 1 if jth LF is triggered on ith instance, else it is 0
+			path_test: Path to the pickle file containing test data set
 		Return:
-			numpy.ndarray of shape (num_instances,) which are predicted labels using graphical model 
+			numpy.ndarray of shape (num_instances,) which are predicted labels
 			[Note: no aggregration/algorithm-running will be done using the current input]
 		'''
-		s_temp = torch.tensor(s_test).double()
-		s_temp[s_temp > 0.999] = 0.999
-		s_temp[s_temp < 0.001] = 0.001
-		assert m_test.shape == s_test.shape
-		assert m_test.shape[1] == self.n_lfs
-		assert np.all(np.logical_or(m_test == 1 or m_test == 0))
-		m_temp = torch.abs(torch.tensor(m_test).long())
-		return predict_gm(self.theta, self.pi, m_test, s_temp, self.k, self.n_classes, self.continuous_mask, self.qc)
+		data = get_data(path_test)
+		s_test = torch.tensor(data[6]).double()
+		s_test[s_test > 0.999] = 0.999
+		s_test[s_test < 0.001] = 0.001
+		assert (data[2]).shape[1] == self.n_lfs
+		m_test = torch.abs(torch.tensor(data[2]).long())
 
-	def predict_feature_model(self, x_test):
+		return predict_gm(self.theta, self.pi, m_test, s_test, self.k, self.n_classes, self.n, self.qc)
+
+	def predict_feature_model(self, path_test):
 		'''
+			Used to find the predicted labels based on the trained parameters of feature model
+
 		Args:
-			x_test: numpy.ndarray of shape (num_instances, num_features), x_test[i][j] is jth feature of ith instance
-		Return: 
-			numpy.ndarray of shape (num_instances,) which are predicted labels by feature model 
+			path_test: Path to the pickle file containing test data set
+		Return:
+			numpy.ndarray of shape (num_instances,) which are predicted labels
 			[Note: no aggregration/algorithm-running will be done using the current input]
 		'''
-		return np.argmax((torch.nn.Softmax()(self.lr_model(x_test))).detach().numpy(), 1)
+		data = get_data(path_test)
+		x_test = data[0]
+		assert x_test.shape[1] == self.n_features
 
+		return np.argmax((torch.nn.Softmax()(self.lr_model(x_test))).detach().numpy(), 1)

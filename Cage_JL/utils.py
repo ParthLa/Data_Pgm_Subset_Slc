@@ -41,7 +41,7 @@ def get_data(path):
 			else:
 				data.append(pickle.load(f).astype(np.int32))
 
-			assert type(data[i]) = np.ndarray
+			assert type(data[i]) == np.ndarray
 
 	assert data[1].shape == data[2].shape # l, m
 	assert data[1].shape == data[5].shape # l, r
@@ -179,7 +179,7 @@ def log_likelihood_loss(theta, pi, l, s, k, n_classes, continuous_mask, qc):
 
 def precision_loss(theta, k, n_classes, a): 
 	'''
-		Graphical model utils: Precison loss, the R(theta) term in loss function
+		Graphical model utils: Precison loss, the R(theta) term in CAGE loss function
 
 	Args:
 		theta: [n_classes, n_lfs], the parameters

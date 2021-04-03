@@ -58,8 +58,8 @@ Joint Learning(JL)
 	:members:
 
 
-Others
-======
+CAGE, JL utils
+===============
 
 Feature-based Models
 ---------------------
