@@ -1,8 +1,17 @@
 from my_utils import get_data
+import tensorflow as tf
 
 class Implyloss:
 	def __init__(self,data, num_classes):
 		'''
+		func desc:
+		the constructor of the Implyloss class
+
+		Input:
+		data(9-length list): a list of the required values extracted from the pickle file
+		num_classes(integer): the number of classes from which we can label
+
+		Sets:
 		* x : feature representation of instance
 			- shape : [batch_size, num_features]
 
@@ -36,7 +45,7 @@ class Implyloss:
 			- Note that this is different from rule coverage matrix "m"
 			- This matrix defines the rule,example pairs provided as supervision 
 
-		* s : A similarity measure matrix shape [num_instances, num_rules]
+		* s : A similarity measure matrix shape [batch_size, num_rules]
 			- s[i][j] is in [0,1]
 
 		* n : A vector of size [num_rules,]
@@ -45,11 +54,17 @@ class Implyloss:
 		* k : a vector of size [num_rules,]
 			- #LF classes ie., what class each LF correspond to, range: 0 to num_classes-1
 		'''
+		assert (self.x[1]==num_features) # batch_size
 		self.x=data[0]
+		assert (self.l[0]==self.x[0]) # batch_size
 		self.l=data[1]
+		assert (m.shape==l.shape)
 		self.m=data[2]
+		assert (L.shape[0]==m.shape[0])
 		self.L=data[3]
+		assert(d.shape==L.shape)
 		self.d=data[4]
+		assert (r.shape==l.shape)
 		self.r=data[5]
 		self.s=data[6]
 		self.n=data[7]
@@ -61,17 +76,32 @@ class Implyloss:
 		self.f_network = functools.partial(f_network, self.f_var_scope)
 	
 	def optimize(self):
-		# w_network
+		'''
+		func desc: 
+		compute the training objective and aim to minimize the loss function using the adam optimizer
+		
+		Input:
+		self object
+
+		evaluates:
+		weights, w_logits of rule network
+		f_logits of the classification network
+		LL_phi term
+		LL_theta term
+		training objective term
+		minimize the loss using adam optimizer
+		'''
+		# w_network - rule network: Used to train P_j_phi(r_j/x_i) i.e. whether rij = 1 for the ith instance and jth rule
 		# weights: [batch_size, num_rules]
 		# w_logits: [batch_size, num_rules]
 		weights, w_logits = self.get_weights_and_logits(self.x)
 		self.weights = weights
 
-		# f_network
+		# f_network - classification network: Used to train P_j_theta(l_j/x_i) i.e. the probability of ith instance belonging to jth class 
 		# f_dict: [batch_size, num_classes]
 		f_dict = {'x': self.x}
 		f_logits = self.f_network(f_dict, self.num_classes, reuse=True, dropout_keep_prob=self.dropout_keep_prob)
-		self.probs = tf.math.softmax(f_logits, axis=-1)
+		self.probs = tf.math.softmax(f_logits, axis=-1) # value computed along axis = -1 => this dimension reduced in output
 		self.preds = tf.argmax(self.f_probs, axis=-1)
 		self.joint_f_w_score = self.joint_scores_from_f_and_w(self.weights,self.m,self.probs)
 
@@ -80,6 +110,7 @@ class Implyloss:
 		# will be multiplied by 0 anyway.
 		L = L % self.num_classes
 
+		# LL(\theta) (first term in eqn 5)
 		# LL_theta term which is on d data
 		L_one_hot = tf.one_hot(L, self.num_classes)
 		LL_theta = tf.nn.softmax_cross_entropy_with_logits(logits=f_logits,
@@ -87,9 +118,9 @@ class Implyloss:
 		LL_theta = d * LL_theta
 		LL_theta = tf.reduce_mean(LL_theta) # loss of f network on labeled data d
 		# loss of f network on labeled data d
-		# first term in eqn 5 (LL(\theta))
+		
 
-		# LL(\phi) term
+		# LL(\phi) term (second term in eqn 5)
 		LL_phi = self.compute_LL_phi(w_logits=w_logits, weights=self.weights, l=self.l, m=self.m, L=self.L, d=self.d, r=self.r)
 		
 		self.adam_lr = tf.placeholder(tf.float32,name='adam_lr')
@@ -105,19 +136,32 @@ class Implyloss:
                                                     num_classes=self.num_classes,
                                                     d=d)
             
+            # (eqn 5)
             self.implication_loss = LL_phi \
                                         + LL_theta \
                                         + self.config.gamma*implication_loss
 
             with tf.control_dependencies([inc_f_d_U_global_step,  ]): # need to define inc_f_d_U_global_step here using f_d_U_train_ops and f_d_train_ops  
-                self.f_d_U_implication_op = f_cross_training_optimizer.minimize(
-                        self.f_d_U_implication_loss,
+                self.implication_op = f_cross_training_optimizer.minimize(
+                        self.implication_loss,
                         var_list=training_var_list) 
 	
 	# softmax_cross_entropy_with_logits,
 
 	# get_weights_and_logits: Input - x [batch_size, num_rules], Output - weights [batch_size, num_rules], w_logits [batch_size, num_rules]
 	def get_weights_and_logits(self, x):
+		'''
+		func desc:
+		compute and get the weights and logits for the rule network (w_network) 
+
+		Input: 
+		self object
+		x([batch_size, num_features]) - instance matrix
+
+		Output:
+		weights([batch_size, num_rules]) - the r_ij values i.e. the possibility of a rule overfitting on an instance (r_ij = 0 for ith instance and jth rule)
+		w_logits([batch_size, num_rules]) - 
+		'''
 		# Need to run the w network for each rule for the same x
 		#
 		# [batch_size, num_rules, num_features]
@@ -153,6 +197,19 @@ class Implyloss:
 
 	# joint_scores_from_f_and_w: Input - weights [batch_size, num_rules], m [batch_size, num_rules], f_probs [batch_size, num_classes], result - scalar 
 	def joint_scores_from_f_and_w(self,weights,m,f_probs):
+		'''
+		func desc:
+		Compute the learning scores obtained while jointly learning f(classification network) and w(rule network)
+
+		Input:
+		self object
+		weights([num_instances, num_rules]) - the weights matrix corresponding to rule network(w_network) in the algorithm
+		m([batch_size, num_rules]) - the rule coverage matrix where m_ij denotes if jth rule covers ith instance (if yes, then m_ij = 1)
+		f_probs([batch_size, 1]) - the prob values from classification network (f_network)
+
+		Output:
+		results([batch_size,1]) -  
+		'''
 		num_classes = self.num_classes
 		rule_classes = self.rule_classes
 		#[batch_size, num_rules, 1]
@@ -177,6 +234,23 @@ class Implyloss:
 
 	# compute_LL_phi
 	def compute_LL_phi(self, w_logits, weights, l, m, L, d, r):
+		'''
+		func desc: 
+		Computes the LL_phi term coming in the training objective
+
+		Input:
+		self object
+		w_logits([batch_size, num_rules]) - 
+		weights([batch_size, num_rules]) - the weights matrix corresponding to rule network(w_network) in the algorithm
+		l([batch_size, num_rules]) - labels assigned by the rules
+		m([batch_size, num_rules]) - the rule coverage matrix where m_ij = 1 if jth rule covers ith instance 
+		L([batch_size, 1]) - L_i = 1 if the ith instance has already a label assigned to it in the dataset
+		d([batch_size, 1]) - d_i = 1 if the ith instance is from labelled dataset
+		r([batch_size, num_rules]) - the rule association matrix where r_ij = 1 if jth rule is associated with ith instance (r_ij = 1 => m_ij = 1)
+		
+		Output:
+		loss(real number > 0) - the value of the LL_phi term
+		'''
 		psi = 1e-25
 		L = tf.expand_dims(L,1)
 		# [batch_size, num_rules]
@@ -191,12 +265,28 @@ class Implyloss:
 		loss = tf.reduce_sum(loss,axis=-1)
 		loss = loss * d
 		loss = tf.reduce_mean(loss)
+		assert (loss>=0)
 		return loss
 	
 		# need to write loss functions
 
 	def implication_loss(self, weights, f_probs, m, rule_classes, num_classes, d):
-		''' this is an implication loss function'''
+		''' 
+		func desc:
+		Computes the implication loss value
+
+		input:
+		self object
+		weights([batch_size, num_rules]) - the weights matrix corresponding to rule network(w_network) in the algorithm
+		f_probs([batch_size, 1]) - the prob values from classification network (f_network)
+		m([batch_size, num_rules]) - the rule coverage matrix where m_ij = 1 if jth rule covers ith instance
+		rule_classes
+		num_classes(non_negative integer) - number of available classes
+		d([batch_size, 1]) - d_i = 1 if the ith instance is from labelled dataset
+
+		output:
+		-obj (real number) - the implication loss value
+		'''
 		
         # computes implication loss (Equation 4 in the paper)
         # weights are P_{j,\phi} values from the w network (rule network)
