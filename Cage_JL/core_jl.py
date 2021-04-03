@@ -13,7 +13,7 @@ class Joint_Learning:
 	'''
 	Joint_Learning class:
 		Class for Joint Learning algorithm
-		[Note: from here on, feature model is short for feature-based classification model and graphical model imply CAGE algorithm]
+		[Note: from here on, feature model is short for feature-based classification model and graphical model(gm) imply CAGE algorithm]
 	
 	Args:
 		n_classes: Number of classes/labels, type is integer
@@ -30,14 +30,13 @@ class Joint_Learning:
 		use_accuracy_score: The score to use for termination condition on validation set. True for accuracy_score, False for f1_score
 		feature_model: The model intended to be used for features, allowed values are 'lr' or 'nn' string, default is 'nn'
 		metric_avg: Average metric to be used in calculating f1_score/precision/recall, default is 'macro'
-		qt: Quality guide of shape (n_lfs,) and type numpy.ndarray OR a float. Values must be between 0 and 1
-		qc: Quality index of shape (n_lfs,) and type numpy.ndarray OR a float. Values must be between 0 and 1
+		qt: Quality guide of shape (n_lfs,) of type numpy.ndarray OR a float. Values must be between 0 and 1
+		qc: Quality index of shape (n_lfs,) of type numpy.ndarray OR a float. Values must be between 0 and 1
 		n_hidden: Number of hidden layer nodes if feature model is 'nn', type is integer, default value is 512
 		n_epochs: Number of epochs in each run, type is integer, default value is 100
 		n_runs: Number of runs ,type is integer, default value is 10
 		start_len: A parameter used in validation, type is integer, default is 5
 		stop_len: A parameter used in validation, type is integer, default is 10
-
 	'''
 	def __init__(self, n_classes, path_L, path_U, path_V, path_T , loss_func_mask, is_qt, is_qc, batch_size, lr_feature, lr_gm,\
 	 use_accuracy_score, feature_model = 'nn', metric_avg = 'macro', qt = None, qc = None, n_hidden = 512, n_epochs = 100, n_runs = 10, start_len = 5, stop_len = 10):
@@ -105,7 +104,6 @@ class Joint_Learning:
 			from sklearn.metrics import f1_score as score
 		from sklearn.metrics import precision_score as prec_score
 		from sklearn.metrics import recall_score as recall_score
-
 
 		data_L = get_data(path_L)
 		data_U = get_data(path_U)

@@ -9,11 +9,11 @@ def get_data(path):
 		expected order in pickle file is NUMPY ndarrays x, l, m, L, d, r, s, n, k
 			x: (num_instances, num_features), x[i][j] is jth feature of ith instance
 			
-			l: (num_instances, num_rules), l[i][j] is the prediction of jth LF on ith instance. l[i][j] = num_classes imply Abstain
+			l: (num_instances, num_rules), l[i][j] is the prediction of jth LF(range: 0 to num_classes-1) on ith instance. l[i][j] = num_classes imply Abstain
 			
 			m: (num_instances, num_rules), m[i][j] is 1 if jth LF didn't Abstain on ith instance. Else it is 0
 			
-			L: (num_instances, 1), L[i] is true label of ith instance, if available. Else it is num_classes
+			L: (num_instances, 1), L[i] is true label(range: 0 to num_classes-1) of ith instance, if available. Else it is num_classes
 			
 			d: (num_instances, 1), d[i] is 1 if ith instance is labelled. Else it is 0
 			
@@ -26,7 +26,7 @@ def get_data(path):
 			k: (num_rules,), k[i] is the class of ith LF, range: 0 to num_classes-1
 
 	Args: 
-		path: path to pickle file with data in the format below
+		path: path to pickle file with data in the format above
 
 	Return:
 		A list containing all the numpy arrays mentioned above
@@ -40,6 +40,17 @@ def get_data(path):
 				data.append(pickle.load(f).astype(np.float32))
 			else:
 				data.append(pickle.load(f).astype(np.int32))
+
+			assert type(data[i]) = np.ndarray
+
+	assert data[1].shape == data[2].shape # l, m
+	assert data[1].shape == data[5].shape # l, r
+	assert data[1].shape == data[6].shape # l, s
+	assert data[3].shape == (data[1].shape[0],1) #L, l
+	assert data[4].shape == (data[1].shape[0],1) #d, l
+	assert data[7].shape == (data[1].shape[1],) #n, l
+	assert data[8].shape == (data[1].shape[1],) #k, l
+	assert data[1].shape[0] == data[0].shape[0] #x, l
 	assert np.all(np.logical_or(data[2] == 0, data[2] == 1)) #m
 	assert np.all(np.logical_or(data[4] == 0, data[4] == 1)) #d
 	assert np.all(np.logical_or(data[5] == 0, data[5] == 1)) #r
@@ -55,7 +66,7 @@ def phi(theta, l):
 		theta: [n_classes, n_lfs], the parameters
 		l: [n_lfs]
 	Return:
-		element wise product of input tensors
+		[n_classes, n_lfs], element wise product of input tensors(each row of theta dot product with l)
 	'''
 	return theta * torch.abs(l).double()
 
@@ -108,7 +119,7 @@ def probability_s_given_y_l(pi, s, y, l, k, continuous_mask, qc):
 		l: [n_instances, n_lfs], l[i][j] is 1 if jth LF is triggered on ith instance, else it is 0
 		k: [n_lfs], k[i] is the class of ith LF, range: 0 to num_classes-1
 		continuous_mask: [n_lfs], continuous_mask[i] is 1 if ith LF has continuous counter part, else it is 0
-		qc: a float value OR [n_lfs], qc[i] quality index for ith LF
+		qc: a float value OR [n_lfs], qc[i] quality index for ith LF. Value(s) must be between 0 and 1
 	Return:
 		[n_instances], the psi_pi value for each instance, for the given label(true label y)
 	'''
@@ -135,7 +146,7 @@ def probability(theta, pi, l, s, k, n_classes, continuous_mask, qc):
 		k: [n_lfs], k[i] is the class of ith LF, range: 0 to num_classes-1
 		n_classes: num of classes/labels
 		continuous_mask: [n_lfs], continuous_mask[i] is 1 if ith LF has continuous counter part, else it is 0
-		qc: a float value OR [n_lfs], qc[i] quality index for ith LF
+		qc: a float value OR [n_lfs], qc[i] quality index for ith LF. Value(s) must be between 0 and 1
 	Return:
 		[n_instances, n_classes], the probability for an instance being a particular class
 	'''
@@ -158,7 +169,7 @@ def log_likelihood_loss(theta, pi, l, s, k, n_classes, continuous_mask, qc):
 		k: [n_lfs], k[i] is the class of ith LF, range: 0 to num_classes-1
 		n_classes: num of classes/labels
 		continuous_mask: [n_lfs], continuous_mask[i] is 1 if ith LF has continuous counter part, else it is 0
-		qc: a float value OR [n_lfs], qc[i] quality index for ith LF
+		qc: a float value OR [n_lfs], qc[i] quality index for ith LF. Value(s) must be between 0 and 1
 	Return:
 		a real value, summation over (the log of probability for an instance, marginalised over y(true labels))
 	'''
@@ -174,7 +185,7 @@ def precision_loss(theta, k, n_classes, a):
 		theta: [n_classes, n_lfs], the parameters
 		k: [n_lfs], k[i] is the class of ith LF, range: 0 to num_classes-1
 		n_classes: num of classes/labels
-		a: [n_lfs], a[i] is the quality guide for ith LF
+		a: [n_lfs], a[i] is the quality guide for ith LF. Value(s) must be between 0 and 1
 	Return:
 		a real value, R(t) term
 	'''
@@ -206,7 +217,7 @@ def predict_gm(theta, pi, l, s, k, n_classes, continuous_mask, qc):
 		k: [n_lfs], k[i] is the class of ith LF, range: 0 to num_classes-1
 		n_classes: num of classes/labels
 		continuous_mask: [n_lfs], continuous_mask[i] is 1 if ith LF has continuous counter part, else it is 0
-		qc: a float value OR [n_lfs], qc[i] quality index for ith LF
+		qc: a float value OR [n_lfs], qc[i] quality index for ith LF. Value(s) must be between 0 and 1
 	Return:
 		[n_instances], the predicted class for an instance
 	'''
