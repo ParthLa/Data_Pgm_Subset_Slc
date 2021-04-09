@@ -84,8 +84,8 @@ class Implyloss:
 		self object
 
 		evaluates:
-		weights, w_logits of rule network
-		f_logits of the classification network
+		weights, w_logits of rule network(Used to train P_j_phi(r_j/x_i) i.e. whether rij = 1 for the ith instance and jth rule) [batch_size, num_rules]
+		f_logits of the classification network (Used to train P_j_theta(l_j/x_i) i.e. the probability of ith instance belonging to jth class)
 		LL_phi term
 		LL_theta term
 		training objective term

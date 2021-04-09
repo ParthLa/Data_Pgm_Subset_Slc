@@ -1239,6 +1239,34 @@ void, prints the required statistics</p>
 </dd></dl>
 
 <dl class="py function">
+<dt id="Implyloss.my_utils.compute_accuracy">
+<code class="sig-prename descclassname"><span class="pre">Implyloss.my_utils.</span></code><code class="sig-name descname"><span class="pre">compute_accuracy</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">support</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">recall</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Implyloss/my_utils.html#compute_accuracy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Implyloss.my_utils.compute_accuracy" title="Permalink to this definition">¶</a></dt>
+<dd><p>func desc:
+compute the required accuracy</p>
+<p>input:
+support
+recall</p>
+<p>output:
+accuracy</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="Implyloss.my_utils.conv_l_to_lsnork">
+<code class="sig-prename descclassname"><span class="pre">Implyloss.my_utils.</span></code><code class="sig-name descname"><span class="pre">conv_l_to_lsnork</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">l</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">m</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Implyloss/my_utils.html#conv_l_to_lsnork"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Implyloss.my_utils.conv_l_to_lsnork" title="Permalink to this definition">¶</a></dt>
+<dd><p>func desc:
+in snorkel convention
+if a rule does not cover an instance assign it label -1
+we follow the convention where we assign the label num_classes instead of -1
+valid class labels range from {0,1,…num_classes-1}
+conv_l_to_lsnork:  converts l in our format to snorkel’s format</p>
+<p>input:
+l([batch_size, num_rules]) - rule label matrix
+m([batch_size, num_rules]) - rule coverage matrix</p>
+<p>output:
+lsnork([batch_size, num_rules])</p>
+</dd></dl>
+
+<dl class="py function">
 <dt id="Implyloss.my_utils.convert_m_to_l">
 <code class="sig-prename descclassname"><span class="pre">Implyloss.my_utils.</span></code><code class="sig-name descname"><span class="pre">convert_m_to_l</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">m</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rule_classes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_classes</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Implyloss/my_utils.html#convert_m_to_l"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Implyloss.my_utils.convert_m_to_l" title="Permalink to this definition">¶</a></dt>
 <dd><p>func desc:
@@ -1292,6 +1320,17 @@ m([batch_size, num_rules]) - the rule coverage matrix where m_ij = 1 if jth rule
 micro_p -
 macro_p -
 comp -</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="Implyloss.my_utils.merge_dict_a_into_b">
+<code class="sig-prename descclassname"><span class="pre">Implyloss.my_utils.</span></code><code class="sig-name descname"><span class="pre">merge_dict_a_into_b</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Implyloss/my_utils.html#merge_dict_a_into_b"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Implyloss.my_utils.merge_dict_a_into_b" title="Permalink to this definition">¶</a></dt>
+<dd><p>func desc:
+set the dict values of b to that of a</p>
+<p>input:
+a, b : dicts</p>
+<p>output:
+void</p>
 </dd></dl>
 
 </div>
