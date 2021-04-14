@@ -1,4 +1,5 @@
-from my_utils import get_data
+from my_utils import *
+from my_data_types import *
 import tensorflow as tf
 
 class Implyloss:
