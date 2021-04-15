@@ -13,6 +13,21 @@ class DataFeeder():
     def __init__(self, d_pickle, U_pickle, validation_pickle,
             out_dir='./',
             config=None):
+    '''
+    Func Desc:
+    Initialize the object with the given parameter files
+
+    Input: 
+    self
+    d_pickle - labelled data file
+    U_pickle - unlabelled data file
+    validation_pickle - validation data file
+    out_dir (Default = './') - output directory
+    config (Default = None) - config file
+
+    Output:
+    Void
+    '''
         self.f_d_U_start = 0
         self.shuffle_batches=config.shuffle_batches
         self.out_dir = out_dir
@@ -117,6 +132,17 @@ class DataFeeder():
 
     
     def convert_raw_test_data_to_f(self, raw_test_data):
+        '''
+        Func Desc:
+        to convert raw test data to f (classification network)
+
+        Input:
+        self
+        raw_test_data - 
+
+        Output:
+        f data with the required parameters
+        '''
         x = raw_test_data.x
         labels = np.squeeze(raw_test_data.L)
         assert max(labels) <= self.num_classes - 1 or np.all(labels == self.num_classes)
@@ -124,6 +150,17 @@ class DataFeeder():
         return x, labels, labels_one_hot, raw_test_data.l, raw_test_data.m, raw_test_data.d, raw_test_data.r
 
     def convert_raw_test_data_to_w(self, raw_test_data):
+        '''
+        Func Desc:
+        to convert raw test data to w (rule network)
+
+        Input:
+        self
+        raw_test_data - 
+
+        Output:
+        F_d_U_data
+        '''
         test_w = self.remove_instances_labeled_by_no_rules(raw_test_data)
         print('Setting value of d to 0 for test data')
         d_new = np.zeros_like(test_w.d)
@@ -137,6 +174,17 @@ class DataFeeder():
 
 
     def remove_instances_labeled_by_no_rules(self, raw_U):
+        '''
+        Func Desc:
+        Removes those instances that are labelled by no rules
+
+        Input:
+        self
+        raw_U - raw Unlabelled Data
+
+        Output:
+        F_d_U_data
+        '''
         xx = []
         ll = []
         mm = []
@@ -167,6 +215,17 @@ class DataFeeder():
 
 
     def combine_f_d_U(self, raw_d, raw_U, d_class_sampling):
+        '''
+        Func Desc:
+        combines the labelled (raw_d) and Unlabelled (raw_U) data
+
+        Input:
+        self
+        raw_d - labelled data
+        raw_U - unlabelled data
+        d_class_sampling - sampling distribution
+        
+        '''
         print('Size of d before oversampling: ', len(raw_d.x))
         print('Size of U (covered) : ', len(raw_U.x))
         # Oversample d according to its class
@@ -198,6 +257,18 @@ class DataFeeder():
 
     # Need x and true labels only (x, L)
     def convert_raw_d_to_f_d(self, raw_d, num_load=30):
+        '''
+        Func Desc:
+        converts raw d to f
+
+        Input:
+        self
+        raw_d - 
+        num_load (default = 30)
+
+        Output:
+        F_d_Data
+        '''
         if num_load <= 0:
             num_load = len(raw_d.x)
 
@@ -210,6 +281,10 @@ class DataFeeder():
         return F_d_Data(x, label)    
 
     def reset_batch(self, data_type):
+        '''
+        Func Desc:
+        
+        '''
         self.batch_counter[data_type] = 0
         if not self.shuffle_batches or data_type == test_w:
             print('Not shuffling batch for data type: ', data_type)

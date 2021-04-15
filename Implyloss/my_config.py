@@ -9,7 +9,11 @@ from my_utils import get_list_or_None, None_if_zero, get_list, boolean
 
 def parse_args():
     """
+    Func Desc:
     Parse input arguments
+    Input: 
+    
+    Output: 
     """
     parser = argparse.ArgumentParser(allow_abbrev=False)
 

@@ -133,6 +133,17 @@ def oversample_f_d(x, labels, sampling_dist):
     return np.array(x_list), np.array(L_list)
 
 def oversample_d(raw_d, sampling_dist):
+    '''
+    Func Desc:
+    performs oversampling on the raw labelled data using the given distribution
+
+    Input:
+    raw_d - raw labelled data
+    sampling_dist - the given sampling dist
+
+    Output:
+    F_d_U_Data
+    '''
     x_list = []
     l_list = []
     m_list = []

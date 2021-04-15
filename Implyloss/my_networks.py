@@ -12,9 +12,33 @@ from my_utils import merge_dict_a_into_b
 
 
 def create_initializer(initializer_range=0.02):
+    '''
+    func desc:
+    creates the truncated initializer range of gaussian shape
+
+    Input:
+    initializer_range (Defailt = 0.02) - the stddev of the expected range
+
+    Output:
+    the truncated normal range 
+    '''
   return tf.truncated_normal_initializer(stddev=initializer_range)
 
 def w_network_fully_connected(w_var_scope, num_rules, w_dict, reuse=False, dropout_keep_prob=1.0):
+    '''
+    Func desc:
+    creates the fully connected NN for the w network (rule network)
+
+    Input:
+    w_var_scope - the variable scope of the w network
+    num_rules - number of rules
+    w_dict - rule dictionary
+    reuse (default - False)
+    dropout_keep_prob (default - 1.0) 
+
+    Output:
+    the NN itself with all its layers and weights
+    '''
     x = w_dict['x']
     rule = w_dict['rules'] #one hot rule representation
     rules_int = w_dict['rules_int'] #integer rule representation
@@ -38,7 +62,21 @@ def w_network_fully_connected(w_var_scope, num_rules, w_dict, reuse=False, dropo
 def f_network_fully_connected(f_var_scope, f_dict, num_classes, 
                               reuse=False, ph_vars=None, 
                               dropout_keep_prob=1.0):
-    
+    '''
+    Func desc:
+    creates the fully connected NN for the f network (classification network)
+
+    Input:
+    f_var_scope - the variable scope of the f network
+    f_dict - rule dictionary
+    num_classes - number of classes
+    reuse (default - False)
+    ph_vars (default - None)
+    dropout_keep_prob (default - 1.0) 
+
+    Output:
+    the NN itself with all its layers and weights
+    '''
     x = f_dict['x']
     if not ph_vars:
         with tf.variable_scope(f_var_scope, reuse=reuse, initializer=create_initializer()) as vs:
