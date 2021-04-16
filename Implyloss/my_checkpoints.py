@@ -15,6 +15,19 @@ from my_config import flags as config
 
 class MRUCheckpoint():
     def __init__(self, path, session, variables):
+        '''
+        Func Desc:
+        Initializes the class variables
+
+        Input:
+        self
+        path - file path
+        session 
+        variables
+
+        Output:
+
+        '''
         self.ckpt_path = path
         self.ckpt_file = os.path.join(path, 'checkpoint')
         self.checkpoint_prefix = os.path.join(self.ckpt_path, 'hls-model')
@@ -23,10 +36,31 @@ class MRUCheckpoint():
         self.saver = tf.train.Saver(variables, max_to_keep=1)
 
     def save(self, global_step=None):
+        '''
+        Func Desc:
+        saves the obtained checkpoint
+
+        Input:
+        self
+        global step (Default - none)
+
+        Output:
+
+        '''
         path = self.saver.save(self.sess, self.checkpoint_prefix, global_step)
         print('Saved MRU checkpoint to path: ', path)
         
     def restore(self):
+        '''
+        Func Desc:
+        Restores the last checkpoint
+
+        Input:
+        self
+
+        Output:
+
+        '''
         last_checkpoint = tf.train.latest_checkpoint(self.ckpt_path, 'checkpoint')
         #if self.saver.last_checkpoints:
         #    last_checkpoint = self.saver.last_checkpoints[0]
@@ -39,12 +73,32 @@ class MRUCheckpoint():
         self.saver.restore(self.sess, last_checkpoint)
 
     def restore_if_checkpoint_exists(self):
+        '''
+        Func Desc:
+        checks if there exists any checkpoint for the file 
+
+        Input:
+        self
+
+        Output:
+        Boolean (True or False)
+        '''
         if os.path.exists(self.ckpt_file):
             self.restore()
             return True
         return False
 
 def test_mru_checkpoints(num_to_keep):
+    '''
+    Func Desc:
+    Runs different sessions while changing the checkpoint number that is currently being worked with and tests the same
+    
+    Input:
+    num_to_keep(int) - a limit on the size of the global step for checkpoint traversal
+
+    Output:
+
+    '''
     global_step = tf.get_variable(name='mru_global_step_%d' % num_to_keep, initializer=10, dtype=tf.int32)
     inc = tf.assign_add(global_step, 1)
     sess = tf.Session()
@@ -76,6 +130,15 @@ def test_mru_checkpoints(num_to_keep):
     assert sess.run(global_step) == 5
 
 def test_checkpoint():
+    '''
+    Func Desc:
+    tests whether the checkpoints stored are as expected
+
+    Input:
+
+    Output:
+
+    '''
     v = tf.get_variable(name='v', initializer=12, dtype=tf.int32)
     v1 = tf.assign_add(v, 1)
     sess = tf.Session()
@@ -105,6 +168,22 @@ def test_checkpoint():
 
 class BestCheckpoint():
     def __init__(self, path, prefix, session, num_checkpoints, variables, global_step):
+        '''
+        Func Desc:
+        Initializes the class member variables to find the Best checkpoint so far
+
+        Input:
+        self
+        path
+        prefix
+        session
+        num_checkpoints
+        variables
+        global_step
+
+        Output:
+
+        '''
         self.ckpt_path = os.path.join(path, prefix)
         #self.ckpt_file = os.path.join(self.ckpt_path, 'checkpoint')
         #self.checkpoint_prefix = os.path.join(self.ckpt_path, prefix)
@@ -120,6 +199,17 @@ class BestCheckpoint():
         self.global_step = global_step
 
     def save_if_best(self, metric):
+        '''
+        Func Desc:
+        save if the current checkpoint is the best so far
+
+        Input:
+        self
+        metric
+
+        Output:
+
+        '''
         saved = self.best_ckpt_saver.handle(metric, self.sess, self.global_step)
         path = tf.train.latest_checkpoint(self.ckpt_path, 'checkpoint')
         if saved:
@@ -128,11 +218,31 @@ class BestCheckpoint():
             print('No new best checkpoint. Did not save a new best checkpoint. Last checkpointed file: ', path)
         
     def restore_best_checkpoint(self):
+        '''
+        Func Desc:
+        Restore the best checkpoint so far
+
+        Input:
+        self
+
+        Output:
+
+        '''
         best_ckpt_file = get_best_checkpoint(self.ckpt_path, select_maximum_value=True)
         print('Restoring best checkpoint from path: ', best_ckpt_file)
         self.saver.restore(self.sess, best_ckpt_file)
 
     def restore_best_checkpoint_if_exists(self):
+        '''
+        Func Desc:
+        Restore the best checkpoint so far only if it exists
+
+        Input:
+        self
+
+        Output:
+
+        '''
         try:
             self.restore_best_checkpoint()
             return True
@@ -141,6 +251,15 @@ class BestCheckpoint():
             return False
 
 def test_best_ckpt():
+    '''
+    Func Desc:
+    test for the best checkpoint so far
+
+    Input:
+
+    Output:
+
+    '''
     global_step = tf.get_variable(name='global_step', initializer=50, dtype=tf.int32)
     inc_global_step = tf.assign_add(global_step, 1)
     sess1 = tf.Session()
@@ -191,6 +310,15 @@ def test_best_ckpt():
     assert sess2.run(global_step) == 53
 
 def test_checkmate():
+     '''
+    Func Desc:
+    test whether the checkmate model is working fine
+
+    Input:
+
+    Output:
+
+    '''
     global_step = tf.get_variable(name='checkmate_global_step', initializer=12, dtype=tf.int32) 
     inc_global_step_op = tf.assign_add(global_step, 1)
     sess = tf.Session()
@@ -252,17 +380,65 @@ def test_checkmate():
 # We have one best checkpoint saver per train mode type
 class CheckpointsFactory:
     def __init__(self, sess, global_steps):
+        '''
+        Func Desc:
+        Initializes the class with the arguments
+
+        Input:
+        self
+        sess 
+        global_steps
+
+        Output:
+
+        '''
         self.best_savers = {}
         self.initialize_savers(sess, global_steps)
 
     def get_best_saver(self, train_mode):
+        '''
+        Func Desc:
+        get the best saved checkpoints
+
+        Input:
+        self
+        Train_mode - the mode of training
+
+        Output:
+
+        '''
        return self.best_savers[train_mode]
 
     def initialize_savers(self, sess, global_steps):
+        '''
+        Func Desc:
+        Initialize the required savers
+
+        Input:
+        self
+        sess
+        global_steps
+
+        Output:
+
+        '''
         for mode in train_modes:
             self.init_saver(sess, mode, global_steps)
 
     def init_saver(self, sess, mode, global_steps):
+        '''
+        Func Desc:
+        Initialize the required savers with the given mode
+
+        Input:
+        self
+        sess
+        mode
+        global_steps
+
+        Output:
+
+        '''
         ckpt_dir = config.checkpoint_dir
         self.best_savers[mode] = BestCheckpoint(ckpt_dir, mode, sess,
                 config.num_checkpoints, tf.global_variables(), global_steps[mode])
