@@ -21,15 +21,35 @@ from my_utils import print_tf_global_variables, updated_theta_copy
 class HighLevelSupervisionNetwork:
     # Parameters
     display_step = 1
-
-    # Initialize HLS with number of input features, number of classes, number
-    # of rules and the f and the w network
-    # f network is the classification network (P_{\theta})
-    # w network is the rule network (P_{j,\phi})
-    
+    '''
+    Class Desc:
+    Initialize HLS with number of input features, number of classes, number of rules and the f and the w network.
+    f network is the classification network (P_{theta})
+    w network is the rule network (P_{j,phi})
+    '''
     def __init__(self, num_features, num_classes, num_rules,
             num_rules_to_train, rule_classes,
             w_network, f_network, raw_d_x=None, raw_d_L=None, config=None):
+    	'''
+    	Func Desc:
+    	initializes the class member variables with the provided arguments
+
+    	Input:
+    	self
+    	num_features
+    	num_classes
+    	num_rules
+    	num_rules_to_train
+    	rule_classes
+    	w_network
+    	f_network
+    	raw_d_x (default = None)
+    	raw_d_L (default = None)
+    	config (default = None)
+
+    	Output:
+
+    	'''
         
         # Modules for testing/training
         self.train = HLSTrain(self, config)
@@ -92,6 +112,20 @@ class HighLevelSupervisionNetwork:
                         config.checkpoint_load_mode)
 
     def parse_params(self, config):
+    	'''
+    	Func Desc:
+    	Parses the parameters present in the config file
+
+    	Input:
+    	self
+    	config 
+
+    	Sets:
+    	f_d_epochs
+    	f_d_U_epochs
+    	initial_f_d_adam_lr
+    	initial_f_d_U_adam_lr
+    	'''
         self.f_d_epochs     =   config.f_d_epochs
         self.f_d_U_epochs   = config.f_d_U_epochs
         self.initial_f_d_adam_lr = config.f_d_adam_lr
@@ -99,6 +133,16 @@ class HighLevelSupervisionNetwork:
 
     # Create the train op for training with d only
     def make_f_d_train_ops(self):
+    	'''
+    	Func Desc:
+		create the train_ops based on labelled data only
+
+		Input:
+		self
+
+		Output:
+
+		'''
         self.f_d_global_step = tf.Variable(0, trainable=False, name='f_d_global_step')
         inc_f_d_global_step = tf.assign_add(self.f_d_global_step, 1)
         self.global_steps[f_d] = self.f_d_global_step
@@ -135,10 +179,9 @@ class HighLevelSupervisionNetwork:
         self.f_d_U_global_step = tf.Variable(0, trainable=False, name='f_d_U_global_step')
         inc_f_d_U_global_step = tf.assign_add(self.f_d_U_global_step, 1)
         self.global_steps[f_d_U] = self.f_d_U_global_step
-         # Input from data feeder is the following:
         '''
-        func desc:
-        make_f_d_U_train_ops, compute the training objective and aim to minimize the loss function using the adam optimizer
+        Func desc:
+        make_f_d_U_train_ops i.e. training ops by combining labelled and unlabelled data, compute the training objective and aim to minimize the loss function using the adam optimizer
 
         Input:
 		self object
@@ -186,13 +229,13 @@ class HighLevelSupervisionNetwork:
         * k : a vector of size [num_rules,]
             - #LF classes ie., what class each LF correspond to, range: 0 to num_classes-1
 
-        Evaluates:
-        weights, w_logits of rule network(Used to train P_j_phi(r_j/x_i) i.e. whether rij = 1 for the ith instance and jth rule) [batch_size, num_rules]
-        f_logits of the classification network (Used to train P_j_theta(l_j/x_i) i.e. the probability of ith instance belonging to jth class)
+        Computes:
+        weights, w_logits of rule network ([batch_size, num_rules]) - Used to train P_j_phi(r_j/x_i) i.e. whether rij = 1 for the ith instance and jth rule 
+        f_logits of the classification network - Used to train P_j_theta(l_j/x_i) i.e. the probability of ith instance belonging to jth class
         LL_phi term
         LL_theta term
-        training objective term
-        minimize the loss using adam optimizer
+        Training objective term
+        Minimum loss using adam optimizer
         '''
 
         self.f_d_U_adam_lr = tf.placeholder(tf.float32,name='f_d_U_adam_lr')
@@ -433,7 +476,7 @@ class HighLevelSupervisionNetwork:
 
     def compute_LL_phi(self, w_logits, weights, l, m, L, d, r):
         '''
-        func desc: 
+        Func desc: 
         Computes the LL_phi term coming in the training objective
 
         Input:
@@ -468,7 +511,7 @@ class HighLevelSupervisionNetwork:
 
     def implication_loss(self, weights, f_probs, m, rule_classes, num_classes, d):
         ''' 
-        func desc:
+        Func desc:
         Computes the implication loss value
 
         input:
@@ -505,7 +548,7 @@ class HighLevelSupervisionNetwork:
 
     def get_weights_and_logits_f_d_U(self, x):
         '''
-        func desc:
+        Func desc:
         compute and get the weights and logits for the rule network (w_network) 
 
         Input: 
@@ -551,7 +594,7 @@ class HighLevelSupervisionNetwork:
 
     def joint_scores_from_f_and_w(self,weights,m,f_probs):
         '''
-        func desc:
+        Func desc:
         Compute the learning scores obtained while jointly learning f(classification network) and w(rule network)
 
         Input:

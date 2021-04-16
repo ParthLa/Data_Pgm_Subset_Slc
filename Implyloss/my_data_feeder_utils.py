@@ -10,6 +10,17 @@ seq_len = 25
 
 
 def load_data(fname, num_load=None):
+    '''
+    Func Desc:
+    load the data from the given file
+
+    Input:
+    fname - filename
+    num_load (default - None)
+
+    Output:
+    the structured F_d_U_Data
+    '''
     print('Loading from hoff ', fname)
     with open(fname, 'rb') as f:
         x = pickle.load(f)
@@ -45,6 +56,17 @@ def load_data(fname, num_load=None):
 
 
 def get_rule_classes(l, num_classes):
+    '''
+    Func Desc:
+    get the different rule_classes 
+
+    Input:
+    l ([batch_size, num_rules])
+    num_classes (int) - the number of available classes 
+
+    Output:
+    rule_classes ([num_rules,1]) - the list of valid classes labelled by rules (say class 2 by r0, class 1 by r1, class 4 by r2 => [2,1,4])
+    '''
     num_rules = l.shape[1]
     rule_classes = []
     for rule in range(num_rules):
@@ -62,13 +84,27 @@ def get_rule_classes(l, num_classes):
         if rule_class == num_classes:
             print('No valid label found for rule: ', rule)
             # ok if a rule is just a label (i.e. it does not fire at all)
-            #input('Press a key to continue')
+            # input('Press a key to continue')
         rule_classes.append(rule_class)
 
     return rule_classes
 
 
 def extract_rules_satisfying_min_coverage(m, min_coverage):
+    '''
+    Func Desc:
+    extract the rules that satisfy the specified minimum coverage
+
+    Input:
+    m ([batch_size, num_rules]) - mij specifies whether ith example is associated with the jth rule
+    min_coverage
+
+    Output:
+    satisfying_rules - list of satisfying rules
+    not_satisfying_rules - list of not satisfying rules
+    rule_map_new_to_old
+    rule_map_old_to_new 
+    '''
     num_rules = len(m[0])
     coverage = np.sum(m, axis=0)
     satisfying_threshold = coverage >= min_coverage
@@ -91,23 +127,69 @@ def extract_rules_satisfying_min_coverage(m, min_coverage):
 
 
 def remap_2d_array(arr, map_old_to_new):
+    '''
+    Func Desc:
+    remap those columns of 2D array that are present in map_old_to_new
+
+    Input:
+    arr ([batch_size, num_rules])
+    map_old_to_new
+
+    Output:
+    modified array
+
+    '''
     old = np.arange(len(map_old_to_new))
     arr[:, old] = arr[:, map_old_to_new]
     return arr
 
 
 def remap_1d_array(arr, map_old_to_new):
+    '''
+    Func Desc:
+    remap those positions of 1D array that are present in map_old_to_new
+
+    Input:
+    arr ([batch_size, num_rules])
+    map_old_to_new
+
+    Output:
+    modified array
+    
+    '''
     old = np.arange(len(map_old_to_new))
     arr[old] = arr[map_old_to_new]
     return arr
 
 
 def modify_d_or_U_using_rule_map(raw_U_or_d, rule_map_old_to_new):
+    '''
+    Func Desc:
+    Modify d or U using the rule map
+
+    Input:
+    raw_U_or_d - the raw data (labelled(d) or unlabelled(U))
+    rule_map_old_to_new - the rule map
+
+    Output:
+    the modified raw_U_or_d
+
+    '''
     remap_2d_array(raw_U_or_d.l, rule_map_old_to_new)
     remap_2d_array(raw_U_or_d.m, rule_map_old_to_new)
 
 
 def shuffle_F_d_U_Data(data):
+    '''
+    Func Desc:
+    shuffle the input data along the 0th axis i.e. among the different instances 
+
+    Input:
+    data
+
+    Output:
+    the structured and shuffled F_d_U_Data
+    '''
     idx = np.arange(len(data.x))
     np.random.shuffle(idx)
     x = np.take(data.x, idx, axis=0)
@@ -121,6 +203,15 @@ def shuffle_F_d_U_Data(data):
 
 
 def oversample_f_d(x, labels, sampling_dist):
+    '''
+    Func Desc:
+    Oversample the labelled data using the arguments provided
+
+    Input:
+    x ([batch_size, num_features]) - the data
+    labels
+    samping_dist
+    '''
     x_list = []
     L_list = []
     #print('Sampling distribution: ', sampling_dist)

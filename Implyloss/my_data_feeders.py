@@ -283,7 +283,14 @@ class DataFeeder():
     def reset_batch(self, data_type):
         '''
         Func Desc:
-        
+        restes the batch
+
+        Input:
+        self
+        data_type
+
+        Output:
+
         '''
         self.batch_counter[data_type] = 0
         if not self.shuffle_batches or data_type == test_w:
@@ -314,6 +321,19 @@ class DataFeeder():
     #
     # NOTE: We DO NOT skip the last (incomplete) batch
     def next_batch(self, data_type):
+        '''
+        Func Desc:
+        get the next batch for computation
+
+        Input:
+        self
+        data_type
+
+        Output:
+        start - start of the next batch
+        end - end of the next batch
+
+        '''
         batch_size = self.batch_size[data_type]
 
         num_instances = self.data_lens[data_type]
@@ -347,6 +367,17 @@ class DataFeeder():
     #
     # from d data
     def get_f_d_next_batch(self):
+        '''
+        Func Desc:
+        get the next batch in f_d (labelled data)
+
+        Input:
+        self
+
+        Output:
+        x ([batch_size, num_features]) - the data
+        labels_one_hot
+        '''
         if True:
             start, end = self.next_batch(f_d)
         else:
@@ -366,6 +397,21 @@ class DataFeeder():
 
 
     def get_f_d_U_next_batch(self):
+        '''
+        Func Desc:
+        get the next batch in f_d_U (labelled + unlabelled data)
+
+        Input:
+        self
+
+        Output:
+        x ([batch_size, num_features]) - the data
+        l ([batch_size, num_rules]) - the data labels
+        m ([batch_size, num_rules]) - rule association matrix
+        L ([batch_size, 1]) - labelling check vector
+        d ([batch_size, 1]) - labelled data check vector
+        r ([batch_size, num_rules]) - rule coverage matrix
+        '''
         start, end = self.next_batch(f_d_U)
 
         x = self.f_d_U.x[start:end]
@@ -378,22 +424,90 @@ class DataFeeder():
 
     # Number of instances
     def get_f_d_num_instances(self):
+        '''
+        Func Desc:
+        gives the number of data instances in f_d
+
+        Input:
+        self
+
+        Output:
+        the required count
+
+        '''
         return len(self.f_d.x)
 
     def get_f_d_U_num_instances(self):
+        '''
+        Func Desc:
+        gives the number of data instances in f_d_U
+
+        Input:
+        self
+
+        Output:
+        the required count
+
+        '''
         return len(self.f_d_U.x)
 
     # Batch Sizes
     def get_f_d_batch_size(self):
+        '''
+        Func Desc:
+        gives the batch_size in f_d
+
+        Input:
+        self
+
+        Output:
+        the required size
+
+        '''
         return self.batch_size[f_d]
 
     def get_f_d_U_batch_size(self):
+        '''
+        Func Desc:
+        gives the batch_size in f_d_U
+
+        Input:
+        self
+
+        Output:
+        the required size
+
+        '''
         return self.batch_size[f_d_U]
 
     def get_batch_size(self, data_type):
+        '''
+        Func Desc:
+        gives the batch_size of the required data type
+
+        Input:
+        self
+        dat_type
+
+        Output:
+        the required size
+
+        '''
         return self.batch_size[data_type]
 
     def get_batches_per_epoch(self, data_type):
+        '''
+        Func Desc:
+        gives the total number of batches in the required data type
+
+        Input:
+        self
+        dat_type
+
+        Output:
+        the required count
+
+        '''
         num_instances = self.data_lens[data_type]
         batch_size = self.batch_size[data_type]
         total_batch = num_instances // batch_size
@@ -416,14 +530,60 @@ class DataFeeder():
         return total_batch
 
     def get_features_classes_rules(self):
+        '''
+        Func Desc:
+        get the features, classes and rules of the object
+
+        Input:
+        self
+
+        Output:
+        num_features
+        num_classes
+        num_rules
+        num_rules_to_train
+
+        '''
         return self.num_features, self.num_classes, self.num_rules, \
                 self.num_rules_to_train
 
     def get_f_test_data(self, data_type):
+        '''
+        Func Desc:
+        get the test data for f_network
+
+        Input:
+        self
+        data_type
+
+        Output:
+        test_f_x
+        test_f_labels_one_hot
+        test_f_L
+        test_f_m
+        test_f_d
+
+        '''
         return self.test_f_x, self.test_f_labels_one_hot, \
                 self.test_f_l, self.test_f_m, self.test_f_d
 
     def get_w_test_data(self, data_type=test_w):
+        '''
+        Func Desc:
+        get the test data for w_network
+
+        Input:
+        self
+        data_type (fixed to test_w)
+
+        Output:
+        x ([batch_size, num_features]) - the data
+        l ([batch_size, num_rules]) - the data labels
+        m ([batch_size, num_rules]) - rule association matrix
+        L ([batch_size, 1]) - labelling check vector
+        d ([batch_size, 1]) - labelled data check vector
+        
+        '''
         assert data_type  == test_w
         start, end = self.next_batch(data_type)
 

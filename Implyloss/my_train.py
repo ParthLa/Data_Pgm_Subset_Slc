@@ -19,7 +19,25 @@ from sklearn.metrics import precision_recall_fscore_support
 
 # All training methods for HLS
 class HLSTrain():
+    '''
+    Func Desc:
+    This Class is designed to train the HLS model using the Implyloss Algorithm
+    '''
     def __init__(self, hls, config=None):
+        '''
+        Func Desc:
+        Initializes the class member variables using the arguments provided
+
+        Input:
+        self
+        hls - the hls model
+        config
+
+        Sets:
+        hls
+        config
+        f_d_metrics_pickle
+        '''
         self.hls = hls
         self.config = config
         self.f_d_metrics_pickle = config.f_d_metrics_pickle #file path where metrics of trained model are stored
@@ -27,6 +45,25 @@ class HLSTrain():
         self.make_f_summary_ops()
 
     def make_f_summary_ops(self):
+        '''
+        Func Desc:
+        make the summary of all the essential parameters of f_network
+
+        Input:
+        Self
+
+        Summarizes:
+        f_d_loss_ph
+        f_d_loss
+        f_d_f1_score_ph
+        f_d_f1_score
+        f_d_accuracy_ph
+        f_d_accuracy
+        f_d_avg_f1_score_ph
+        f_d_avg_f1_score
+        f_d_summaries
+
+        '''
         with tf.name_scope('f_summaries'):
             self.f_d_loss_ph = tf.placeholder(tf.float32, shape=None, name='f_d_loss_placeholder')
             self.f_d_loss = tf.summary.scalar('f_d_loss', self.f_d_loss_ph)
@@ -44,6 +81,19 @@ class HLSTrain():
                     self.f_d_accuracy, self.f_d_avg_f1_score])
 
     def report_f_d_perfs_to_tensorboard(self, f_d_loss, metrics_dict, global_step):
+        '''
+        Func Desc:
+        report the f_d_performance to tensorboard
+
+        Input:
+        self
+        f_d_loss
+        metrics_dict
+        global_step
+
+        Output:
+
+        '''
         print('Reporting f_d metrics to tensorboard')
         summ = self.hls.sess.run(self.f_d_summaries, feed_dict={
             self.f_d_loss_ph: f_d_loss,
@@ -54,7 +104,17 @@ class HLSTrain():
         self.hls.writer.add_summary(summ, global_step=global_step)
 
     def train_f_on_d(self, datafeeder, num_epochs):
+        '''
+        Func Desc:
+        trains the f_network (classification network) on labelled data
 
+        Input:
+        self
+        datafeeder - datafeeder object
+        num_epochs - number of epochs for training
+
+        Output:
+        '''
         train_op = self.hls.f_d_train_op
         loss_op = self.hls.f_d_loss
 
@@ -121,6 +181,18 @@ class HLSTrain():
             print("Optimization Finished for f_d!")
 
     def train_f_on_d_U(self, datafeeder, num_epochs, loss_type):
+        '''
+        Func Desc:
+        trains the f_network (classification network) on labelled amd unlabelled data
+
+        Input:
+        self
+        datafeeder - datafeeder object
+        num_epochs - number of epochs for training
+        loss_type - different available losses
+
+        Output:
+        '''
         sess = self.hls.sess
 
         total_batch = datafeeder.get_batches_per_epoch(f_d_U)
@@ -252,8 +324,14 @@ class HLSTrain():
 
     def init_metrics(self):
         '''
-        func desc:
+        Func desc:
         initialize the metrics
+
+        Input:
+        self
+
+        Output:
+        
         '''
         self.metrics_file = {
                 f_d: self.config.f_d_metrics_pickle,
@@ -278,24 +356,53 @@ class HLSTrain():
 
     def get_metric(self, run_type, metrics_dict):
         '''
-        func desc:
+        Func desc:
         get the metrics
+
+        Input:
+        self
+        run_type
+        metrics_dict
+
+        Output:
+        the required metrics_dict
         '''
         return metrics_dict[self.config.f_d_primary_metric]
 
     def save_metrics(self, run_type, metrics_dict):
-         '''
-        func desc:
+        '''
+        Func desc:
         save the metrics
+
+        Input:
+        self
+        run_type
+        metrics_dict
+
+        Prints:
+        The saved metric file
+        
         '''
         with open(self.metrics_file[run_type], 'wb') as f:
             pickle.dump(metrics_dict, f)
         print('\ndumped metrics dict to file: ', self.metrics_file[run_type])
 
     def maybe_save_metrics_dict(self, run_type, metrics_dict):
-         '''
-        func desc:
-        save the best metrics
+        '''
+        Func desc:
+        save the metric if it is the best till now
+
+        Input:
+        self
+        run_type
+        metrics_dict
+
+        Output:
+        True or False denoting whether the current metric is saved or not
+
+        Prints:
+        The saved metric file
+
         '''
         metric = self.get_metric(run_type, metrics_dict)
         if self.best_metric[run_type] < metric:
@@ -310,7 +417,7 @@ class HLSTrain():
 
     def compute_f_d_metrics(self, metrics_dict, precision, recall, f1_score, support, global_epoch, f_d_global_step):
          '''
-        func desc:
+        Func desc:
         compute the f_d metrics
 
         input:

@@ -7,6 +7,19 @@ import tensorflow as tf
 # loss for multiclass prediction problem 
 # (logits corresponding to a softmax distribution and corresponding labels)
 def generalized_cross_entropy(logits, one_hot_labels,q=0.6):
+    '''
+    Func Desc:
+    Computes the generalized cross entropy loss
+
+    Input:
+    logits([batch_size, num_classes]) - weights
+    one_hot_labels([batch_size, num_classes])
+    q (default = 0.6)
+
+    Output:
+    loss
+
+    '''
     #logits: [batch_size, num_classes]
     #one_hot_labels: [batch_size, num_classes]
     if q == 0.0:
@@ -25,8 +38,19 @@ def generalized_cross_entropy(logits, one_hot_labels,q=0.6):
     return loss
 
 # loss for a particular class
-# p = probabilty probability of that class 
+# p = probability of that class 
 def generalized_cross_entropy_bernoulli(p,q=0.2):
+    '''
+    Func Desc:
+    computes the bernoulli generalized cross entropy
+
+    Input:
+    p - base
+    q (default = 0.2) - exponent
+
+    Output:
+    loss
+    '''
     return (1 - tf.pow(p,q))/q
 
 

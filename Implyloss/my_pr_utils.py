@@ -2,6 +2,18 @@ import tensorflow as tf
 import numpy as np
 
 def exp_term_for_constraints(rule_classes, num_classes, C):
+	'''
+	Func Desc:
+	Compute the exponential term for the constraints
+
+	Input:
+	rule_classes ([num_rules,1]) - a list of classes associated with the rules
+	num_classes (int)
+	C
+
+	Output:
+	the required exponential term
+	'''
 	rule_classes_tensor = tf.to_float(tf.convert_to_tensor(rule_classes))
 	#rule_classes_tensor = tf.reshape(rule_classes_tensor,[1,rule_classes])
 	rule_classes_tensor = tf.expand_dims(rule_classes_tensor,0)
@@ -13,6 +25,19 @@ def exp_term_for_constraints(rule_classes, num_classes, C):
 
 
 def pr_product_term(weights, rule_classes, num_classes, C):
+	'''
+	Func Desc:
+	Compute the probability product term for the constraints
+
+	Input:
+	weights ([batch_size, num_rules]) - the w_network weights
+	rule_classes ([num_rules,1]) - a list of classes associated with the rules
+	num_classes (int)
+	C
+
+	Output:
+	the required product term
+	'''
 	# weights: [batch_size, num_rules]
 	class_rule_constraint = exp_term_for_constraints(rule_classes, num_classes, C)
 	#class_rule_constraint = tf.Print(class_rule_constraint,[tf.shape(class_rule_constraint)],message="class_rule_constraint")
@@ -34,6 +59,20 @@ def pr_product_term(weights, rule_classes, num_classes, C):
 
 
 def get_q_y_from_p(f_probs, weights, rule_classes, num_classes, C):
+	'''
+	Func Desc:
+	Compute the q_y term from the p (f_network) distribution 
+
+	Input:
+	f_probs ([batch_size, num_classes])
+	weights ([batch_size, num_rules]) - the w_network weights
+	rule_classes ([num_rules,1]) - a list of classes associated with the rules
+	num_classes (int)
+	C
+
+	Output:
+	the required q_y term
+	'''
 	# f_probs: [batch_size, num_classes]
 	# weights: [batch_size, num_rules]
 	psi = 1e-20
@@ -44,6 +83,20 @@ def get_q_y_from_p(f_probs, weights, rule_classes, num_classes, C):
 	return result
 
 def get_q_r_from_p(f_probs, weights, rule_classes, num_classes, C):
+	'''
+	Func Desc:
+	Compute the q_r term from the p (f_network) distribution 
+
+	Input:
+	f_probs ([batch_size, num_classes])
+	weights ([batch_size, num_rules]) - the w_network weights
+	rule_classes ([num_rules,1]) - a list of classes associated with the rules
+	num_classes (int)
+	C
+
+	Output:
+	the required q_r term
+	'''
 	# f_probs: [batch_size, num_classes]
 	# weights: [batch_size, num_rules]
 	psi = 1e-20
@@ -78,6 +131,22 @@ def get_q_r_from_p(f_probs, weights, rule_classes, num_classes, C):
 
 
 def theta_term_in_pr_loss(f_logits, f_probs, weights, rule_classes, num_classes, C, d):
+	'''
+	Func Desc:
+	Compute the theta term in the pr loss 
+
+	Input:
+	f_logits ([batch_size, num_classes])
+	f_probs ([batch_size, num_classes])
+	weights ([batch_size, num_rules]) - the w_network weights
+	rule_classes ([num_rules,1]) - a list of classes associated with the rules
+	num_classes (int)
+	C
+	d ([batch_size,1])
+
+	Output:
+	the required theta term (third term in equation 14) -  used to supervise f (classification) network from instances in U
+	'''
 	#[batch_size, num_classes]
 	q_y = get_q_y_from_p(f_probs, weights, rule_classes, num_classes, C)
 	cross_ent_q_p = tf.nn.softmax_cross_entropy_with_logits(labels=q_y,logits=f_logits)
@@ -86,6 +155,23 @@ def theta_term_in_pr_loss(f_logits, f_probs, weights, rule_classes, num_classes,
 	return result
 
 def phi_term_in_pr_loss(m, w_logits, f_probs, weights, rule_classes, num_classes, C, d):
+	'''
+	Func Desc:
+	Compute the phi term in the pr loss
+
+	Input:
+	m ([batch_size, num_rules]) - mij = 1 if ith example is associated with jth rule 
+	w_logits ([batch_size, num_rules])
+	f_probs ([batch_size, num_classes])
+	weights ([batch_size, num_rules]) - the w_network weights
+	rule_classes ([num_rules,1]) - a list of classes associated with the rules
+	num_classes (int)
+	C
+	d ([batch_size,1])
+
+	Output:
+	the required phi term (fourth term in equation 14) - used to superwise w (rule) network from instances in U
+	'''
 	#w_logits: [batch_size, num_rules]
 	#m: [batch_size, num_rules]
 	psi = 1e-20
@@ -100,7 +186,26 @@ def phi_term_in_pr_loss(m, w_logits, f_probs, weights, rule_classes, num_classes
 	return cross_ent_q_w
 
 def pr_loss(m, f_logits, w_logits, f_probs, weights, rule_classes, num_classes, C, d):
-	#theta_term : (third term in equation 14) (used to supervise f (classificatin) network from instances in U )
+	'''
+	Func Desc:
+	Compute the  pr loss 
+
+	Input:
+	m ([batch_size, num_rules]) - mij = 1 if ith example is associated with jth rule 
+	f_logits 
+	w_logits ([batch_size, num_rules]) - logit before sigmoid activation in w network
+	f_probs ([batch_size, num_classes]) - output of f network
+	weights ([batch_size, num_rules]) - the sigmoid output from w network
+	rule_classes ([num_rules,1]) - a list of classes associated with the rules
+	num_classes (int)
+	C - lamda in equation 10 (hyperparameter)
+	d ([batch_size,1]) - if ith instance is from "d" set (labelled data) d[i] = 1, else if ith instance is from "U" set, d[i] = 0
+
+	Output:
+	the required phi term
+	'''
+
+	#theta_term : (third term in equation 14) (used to supervise f (classification) network from instances in U )
 	#phi term : (fourth term in equation 14)  (used to superwise w (rule) network from instances in U )
 
 	# m : rule_firing matrix: [batch_size, num_rules]
