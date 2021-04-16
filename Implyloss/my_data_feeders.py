@@ -13,21 +13,21 @@ class DataFeeder():
     def __init__(self, d_pickle, U_pickle, validation_pickle,
             out_dir='./',
             config=None):
-    '''
-    Func Desc:
-    Initialize the object with the given parameter files
+        '''
+        Func Desc:
+        Initialize the object with the given parameter files
 
-    Input: 
-    self
-    d_pickle - labelled data file
-    U_pickle - unlabelled data file
-    validation_pickle - validation data file
-    out_dir (Default = './') - output directory
-    config (Default = None) - config file
+        Input: 
+        self
+        d_pickle - labelled data file
+        U_pickle - unlabelled data file
+        validation_pickle - validation data file
+        out_dir (Default = './') - output directory
+        config (Default = None) - config file
 
-    Output:
-    Void
-    '''
+        Output:
+        Void
+        '''
         self.f_d_U_start = 0
         self.shuffle_batches=config.shuffle_batches
         self.out_dir = out_dir
@@ -567,7 +567,7 @@ class DataFeeder():
         return self.test_f_x, self.test_f_labels_one_hot, \
                 self.test_f_l, self.test_f_m, self.test_f_d
 
-    def get_w_test_data(self, data_type=test_w):
+    def get_w_test_data(self, data_type='test_w'):
         '''
         Func Desc:
         get the test data for w_network

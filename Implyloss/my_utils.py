@@ -427,16 +427,16 @@ def updated_theta_copy(grads, variables, lr, mode):
 	Output:
 	vals - list of the updated gradients 
 	'''
-    vals = []
-    if mode == 1:
-        for g,v in zip(grads,variables):
-            vals.append(v+lr*g)
-    elif mode == -1:
-        for g,v in zip(grads,variables):
-            vals.append(v-lr*g)
-    else:
-        print("invalid mode error!")
-        print(exit(1))
+	vals = []
+	if mode == 1:
+		for g,v in zip(grads,variables):
+			vals.append(v+lr*g)
+	elif mode == -1:
+		for g,v in zip(grads,variables):
+			vals.append(v-lr*g)
+	else:
+		print("invalid mode error!")
+		print(exit(1))
 
-    return vals
+	return vals
 
