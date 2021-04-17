@@ -104,7 +104,7 @@
 </li>
 <li><a class="reference internal" href="#implyloss">IMPLYLOSS</a><ul>
 <li><a class="reference internal" href="#module-Implyloss.my_checkmate">Implyloss Checkmate</a></li>
-<li><a class="reference internal" href="#implyloss-checkpoints">Implyloss Checkpoints</a></li>
+<li><a class="reference internal" href="#module-Implyloss.my_checkpoints">Implyloss Checkpoints</a></li>
 <li><a class="reference internal" href="#implyloss-config">Implyloss Config</a></li>
 <li><a class="reference internal" href="#module-Implyloss.my_data_feeders">Implyloss Data Feeders</a></li>
 <li><a class="reference internal" href="#module-Implyloss.my_data_feeder_utils">Implyloss Data Feeders Utils</a></li>
@@ -1274,8 +1274,45 @@ The full path to the best checkpoint file</p>
 </dd></dl>
 
 </div>
-<div class="section" id="implyloss-checkpoints">
-<h2>Implyloss Checkpoints<a class="headerlink" href="#implyloss-checkpoints" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-Implyloss.my_checkpoints">
+<span id="implyloss-checkpoints"></span><h2>Implyloss Checkpoints<a class="headerlink" href="#module-Implyloss.my_checkpoints" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt id="Implyloss.my_checkpoints.test_best_ckpt">
+<code class="sig-prename descclassname"><span class="pre">Implyloss.my_checkpoints.</span></code><code class="sig-name descname"><span class="pre">test_best_ckpt</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/Implyloss/my_checkpoints.html#test_best_ckpt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Implyloss.my_checkpoints.test_best_ckpt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Func Desc:
+test for the best checkpoint so far</p>
+<p>Input:</p>
+<p>Output:</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="Implyloss.my_checkpoints.test_checkmate">
+<code class="sig-prename descclassname"><span class="pre">Implyloss.my_checkpoints.</span></code><code class="sig-name descname"><span class="pre">test_checkmate</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/Implyloss/my_checkpoints.html#test_checkmate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Implyloss.my_checkpoints.test_checkmate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Func Desc:
+test whether the checkmate model is working fine</p>
+<p>Input:</p>
+<p>Output:</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="Implyloss.my_checkpoints.test_checkpoint">
+<code class="sig-prename descclassname"><span class="pre">Implyloss.my_checkpoints.</span></code><code class="sig-name descname"><span class="pre">test_checkpoint</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/Implyloss/my_checkpoints.html#test_checkpoint"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Implyloss.my_checkpoints.test_checkpoint" title="Permalink to this definition">¶</a></dt>
+<dd><p>Func Desc:
+tests whether the checkpoints stored are as expected</p>
+<p>Input:</p>
+<p>Output:</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="Implyloss.my_checkpoints.test_mru_checkpoints">
+<code class="sig-prename descclassname"><span class="pre">Implyloss.my_checkpoints.</span></code><code class="sig-name descname"><span class="pre">test_mru_checkpoints</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_to_keep</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Implyloss/my_checkpoints.html#test_mru_checkpoints"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Implyloss.my_checkpoints.test_mru_checkpoints" title="Permalink to this definition">¶</a></dt>
+<dd><p>Func Desc:
+Runs different sessions while changing the checkpoint number that is currently being worked with and tests the same</p>
+<p>Input:
+num_to_keep(int) - a limit on the size of the global step for checkpoint traversal</p>
+<p>Output:</p>
+</dd></dl>
+
 </div>
 <div class="section" id="implyloss-config">
 <h2>Implyloss Config<a class="headerlink" href="#implyloss-config" title="Permalink to this headline">¶</a></h2>
