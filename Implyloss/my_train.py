@@ -11,9 +11,9 @@ import pickle
 import sys,os
 from sklearn.metrics import precision_recall_fscore_support
 from snorkel.labeling import labeling_function
-from snorkel.labeling import MajorityLabelVoter
-from snorkel.labeling import LabelModel
-from snorkel.labeling import MajorityLabelVoter
+# from snorkel.labeling import MajorityLabelVoter
+# from snorkel.labeling import LabelModel
+# from snorkel.labeling import MajorityLabelVoter
 from sklearn.metrics import precision_recall_fscore_support
 # from snorkel_utils import conv_l_to_lsnork
 

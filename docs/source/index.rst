@@ -88,7 +88,7 @@ IMPLYLOSS
 
 Implyloss Checkmate
 ---------------------------
-.. automodule:: Implyloss.checkmate.my_checkmate
+.. automodule:: Implyloss.my_checkmate
 	:members:
 
 Implyloss Checkpoints

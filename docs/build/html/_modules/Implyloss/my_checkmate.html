@@ -7,12 +7,12 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Implyloss.checkmate.my_checkmate &mdash; SPEAR(DECILE) 0.0.1 documentation</title>
+  <title>Implyloss.my_checkmate &mdash; SPEAR(DECILE) 0.0.1 documentation</title>
   
 
   
-  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
 
   
   
@@ -24,20 +24,20 @@
 
   
   <!--[if lt IE 9]>
-    <script src="../../../_static/js/html5shiv.min.js"></script>
+    <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
     
-      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
-        <script src="../../../_static/jquery.js"></script>
-        <script src="../../../_static/underscore.js"></script>
-        <script src="../../../_static/doctools.js"></script>
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
     
-    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
     
-    <link rel="index" title="Index" href="../../../genindex.html" />
-    <link rel="search" title="Search" href="../../../search.html" /> 
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -51,7 +51,7 @@
           
 
           
-            <a href="../../../index.html" class="icon icon-home"> SPEAR(DECILE)
+            <a href="../../index.html" class="icon icon-home"> SPEAR(DECILE)
           
 
           
@@ -64,7 +64,7 @@
 
           
 <div role="search">
-  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
@@ -97,7 +97,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../../index.html">SPEAR(DECILE)</a>
+          <a href="../../index.html">SPEAR(DECILE)</a>
         
       </nav>
 
@@ -128,11 +128,11 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
         
-          <li><a href="../../index.html">Module code</a> &raquo;</li>
+          <li><a href="../index.html">Module code</a> &raquo;</li>
         
-      <li>Implyloss.checkmate.my_checkmate</li>
+      <li>Implyloss.my_checkmate</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -147,7 +147,7 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <h1>Source code for Implyloss.checkmate.my_checkmate</h1><div class="highlight"><pre>
+  <h1>Source code for Implyloss.my_checkmate</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">glob</span>
 <span class="kn">import</span> <span class="nn">json</span>
@@ -155,7 +155,7 @@
 <span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
 
 
-<div class="viewcode-block" id="BestCheckpointSaver"><a class="viewcode-back" href="../../../index.html#Implyloss.checkmate.my_checkmate.BestCheckpointSaver">[docs]</a><span class="k">class</span> <span class="nc">BestCheckpointSaver</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<div class="viewcode-block" id="BestCheckpointSaver"><a class="viewcode-back" href="../../index.html#Implyloss.my_checkmate.BestCheckpointSaver">[docs]</a><span class="k">class</span> <span class="nc">BestCheckpointSaver</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;Maintains a directory containing only the best n checkpoints</span>
 
 <span class="sd">    Inside the directory is a best_checkpoints JSON file containing a dictionary</span>
@@ -198,7 +198,7 @@
             <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">save_dir</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">best_checkpoints_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">save_dir</span><span class="p">,</span> <span class="s1">&#39;best_checkpoints&#39;</span><span class="p">)</span>
 
-<div class="viewcode-block" id="BestCheckpointSaver.handle"><a class="viewcode-back" href="../../../index.html#Implyloss.checkmate.my_checkmate.BestCheckpointSaver.handle">[docs]</a>    <span class="k">def</span> <span class="nf">handle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">sess</span><span class="p">,</span> <span class="n">global_step_tensor</span><span class="p">):</span>
+<div class="viewcode-block" id="BestCheckpointSaver.handle"><a class="viewcode-back" href="../../index.html#Implyloss.my_checkmate.BestCheckpointSaver.handle">[docs]</a>    <span class="k">def</span> <span class="nf">handle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">sess</span><span class="p">,</span> <span class="n">global_step_tensor</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Func Desc:</span>
 <span class="sd">        Updates the set of best checkpoints based on the given result.</span>
@@ -334,7 +334,7 @@
         <span class="k">return</span> <span class="n">best_checkpoints</span></div>
 
 
-<div class="viewcode-block" id="get_best_checkpoint"><a class="viewcode-back" href="../../../index.html#Implyloss.checkmate.my_checkmate.get_best_checkpoint">[docs]</a><span class="k">def</span> <span class="nf">get_best_checkpoint</span><span class="p">(</span><span class="n">best_checkpoint_dir</span><span class="p">,</span> <span class="n">select_maximum_value</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<div class="viewcode-block" id="get_best_checkpoint"><a class="viewcode-back" href="../../index.html#Implyloss.my_checkmate.get_best_checkpoint">[docs]</a><span class="k">def</span> <span class="nf">get_best_checkpoint</span><span class="p">(</span><span class="n">best_checkpoint_dir</span><span class="p">,</span> <span class="n">select_maximum_value</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39; </span>
 <span class="sd">    Func Desc:</span>
 <span class="sd">    Reads the best_checkpoints file in the best_checkpoint_dir directory.</span>

@@ -103,7 +103,7 @@
 </ul>
 </li>
 <li><a class="reference internal" href="#implyloss">IMPLYLOSS</a><ul>
-<li><a class="reference internal" href="#module-Implyloss.checkmate.my_checkmate">Implyloss Checkmate</a></li>
+<li><a class="reference internal" href="#module-Implyloss.my_checkmate">Implyloss Checkmate</a></li>
 <li><a class="reference internal" href="#implyloss-checkpoints">Implyloss Checkpoints</a></li>
 <li><a class="reference internal" href="#implyloss-config">Implyloss Config</a></li>
 <li><a class="reference internal" href="#module-Implyloss.my_data_feeders">Implyloss Data Feeders</a></li>
@@ -112,7 +112,7 @@
 <li><a class="reference internal" href="#module-Implyloss.my_model">Implyloss Model</a></li>
 <li><a class="reference internal" href="#module-Implyloss.my_pr_utils">Implyloss PR Utils</a></li>
 <li><a class="reference internal" href="#module-Implyloss.my_test">Implyloss Test</a></li>
-<li><a class="reference internal" href="#implyloss-train">Implyloss Train</a></li>
+<li><a class="reference internal" href="#module-Implyloss.my_train">Implyloss Train</a></li>
 <li><a class="reference internal" href="#module-Implyloss.my_utils">Implyloss Utils</a></li>
 </ul>
 </li>
@@ -1229,11 +1229,11 @@ Else; the return value is predicted labels of numpy array of shape (num_instance
 </div>
 <div class="section" id="implyloss">
 <h1>IMPLYLOSS<a class="headerlink" href="#implyloss" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="module-Implyloss.checkmate.my_checkmate">
-<span id="implyloss-checkmate"></span><h2>Implyloss Checkmate<a class="headerlink" href="#module-Implyloss.checkmate.my_checkmate" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-Implyloss.my_checkmate">
+<span id="implyloss-checkmate"></span><h2>Implyloss Checkmate<a class="headerlink" href="#module-Implyloss.my_checkmate" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
-<dt id="Implyloss.checkmate.my_checkmate.BestCheckpointSaver">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">Implyloss.checkmate.my_checkmate.</span></code><code class="sig-name descname"><span class="pre">BestCheckpointSaver</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">save_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_to_keep</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maximize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">saver</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Implyloss/checkmate/my_checkmate.html#BestCheckpointSaver"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Implyloss.checkmate.my_checkmate.BestCheckpointSaver" title="Permalink to this definition">¶</a></dt>
+<dt id="Implyloss.my_checkmate.BestCheckpointSaver">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">Implyloss.my_checkmate.</span></code><code class="sig-name descname"><span class="pre">BestCheckpointSaver</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">save_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_to_keep</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maximize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">saver</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Implyloss/my_checkmate.html#BestCheckpointSaver"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Implyloss.my_checkmate.BestCheckpointSaver" title="Permalink to this definition">¶</a></dt>
 <dd><p>Maintains a directory containing only the best n checkpoints</p>
 <p>Inside the directory is a best_checkpoints JSON file containing a dictionary
 mapping of the best checkpoint filepaths to the values by which the checkpoints
@@ -1242,8 +1242,8 @@ are compared.  Only the best n checkpoints are contained in the directory and JS
 non-distributed settings.  It is not intended to work with the tf.Estimator
 framework.</p>
 <dl class="py method">
-<dt id="Implyloss.checkmate.my_checkmate.BestCheckpointSaver.handle">
-<code class="sig-name descname"><span class="pre">handle</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sess</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">global_step_tensor</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Implyloss/checkmate/my_checkmate.html#BestCheckpointSaver.handle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Implyloss.checkmate.my_checkmate.BestCheckpointSaver.handle" title="Permalink to this definition">¶</a></dt>
+<dt id="Implyloss.my_checkmate.BestCheckpointSaver.handle">
+<code class="sig-name descname"><span class="pre">handle</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sess</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">global_step_tensor</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Implyloss/my_checkmate.html#BestCheckpointSaver.handle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Implyloss.my_checkmate.BestCheckpointSaver.handle" title="Permalink to this definition">¶</a></dt>
 <dd><p>Func Desc:
 Updates the set of best checkpoints based on the given result.</p>
 <p>Input:
@@ -1257,8 +1257,8 @@ True or False</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="Implyloss.checkmate.my_checkmate.get_best_checkpoint">
-<code class="sig-prename descclassname"><span class="pre">Implyloss.checkmate.my_checkmate.</span></code><code class="sig-name descname"><span class="pre">get_best_checkpoint</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">best_checkpoint_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">select_maximum_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Implyloss/checkmate/my_checkmate.html#get_best_checkpoint"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Implyloss.checkmate.my_checkmate.get_best_checkpoint" title="Permalink to this definition">¶</a></dt>
+<dt id="Implyloss.my_checkmate.get_best_checkpoint">
+<code class="sig-prename descclassname"><span class="pre">Implyloss.my_checkmate.</span></code><code class="sig-name descname"><span class="pre">get_best_checkpoint</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">best_checkpoint_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">select_maximum_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Implyloss/my_checkmate.html#get_best_checkpoint"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Implyloss.my_checkmate.get_best_checkpoint" title="Permalink to this definition">¶</a></dt>
 <dd><p>Func Desc:
 Reads the best_checkpoints file in the best_checkpoint_dir directory.
 Returns the filepath in the best_checkpoints file associated with
@@ -1600,8 +1600,143 @@ the obtained w_predictions</p>
 </dd></dl>
 
 </div>
-<div class="section" id="implyloss-train">
-<h2>Implyloss Train<a class="headerlink" href="#implyloss-train" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-Implyloss.my_train">
+<span id="implyloss-train"></span><h2>Implyloss Train<a class="headerlink" href="#module-Implyloss.my_train" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="Implyloss.my_train.HLSTrain">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">Implyloss.my_train.</span></code><code class="sig-name descname"><span class="pre">HLSTrain</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hls</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Implyloss/my_train.html#HLSTrain"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Implyloss.my_train.HLSTrain" title="Permalink to this definition">¶</a></dt>
+<dd><p>Func Desc:
+This Class is designed to train the HLS model using the Implyloss Algorithm</p>
+<dl class="py method">
+<dt id="Implyloss.my_train.HLSTrain.compute_f_d_metrics">
+<code class="sig-name descname"><span class="pre">compute_f_d_metrics</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metrics_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">precision</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">recall</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">f1_score</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">support</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">global_epoch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">f_d_global_step</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Implyloss/my_train.html#HLSTrain.compute_f_d_metrics"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Implyloss.my_train.HLSTrain.compute_f_d_metrics" title="Permalink to this definition">¶</a></dt>
+<dd><p>Func desc:
+compute the f_d metrics</p>
+<p>input:
+self
+metrics_dict
+precision
+recall
+f1_score
+support
+global_epoch
+f_d_global_step</p>
+<p>output:
+void</p>
+<p>evaluates:
+metrics_dict, accuracy</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="Implyloss.my_train.HLSTrain.get_metric">
+<code class="sig-name descname"><span class="pre">get_metric</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">run_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metrics_dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Implyloss/my_train.html#HLSTrain.get_metric"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Implyloss.my_train.HLSTrain.get_metric" title="Permalink to this definition">¶</a></dt>
+<dd><p>Func desc:
+get the metrics</p>
+<p>Input:
+self
+run_type
+metrics_dict</p>
+<p>Output:
+the required metrics_dict</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="Implyloss.my_train.HLSTrain.init_metrics">
+<code class="sig-name descname"><span class="pre">init_metrics</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/Implyloss/my_train.html#HLSTrain.init_metrics"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Implyloss.my_train.HLSTrain.init_metrics" title="Permalink to this definition">¶</a></dt>
+<dd><p>Func desc:
+initialize the metrics</p>
+<p>Input:
+self</p>
+<p>Output:</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="Implyloss.my_train.HLSTrain.make_f_summary_ops">
+<code class="sig-name descname"><span class="pre">make_f_summary_ops</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/Implyloss/my_train.html#HLSTrain.make_f_summary_ops"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Implyloss.my_train.HLSTrain.make_f_summary_ops" title="Permalink to this definition">¶</a></dt>
+<dd><p>Func Desc:
+make the summary of all the essential parameters of f_network</p>
+<p>Input:
+Self</p>
+<p>Summarizes:
+f_d_loss_ph
+f_d_loss
+f_d_f1_score_ph
+f_d_f1_score
+f_d_accuracy_ph
+f_d_accuracy
+f_d_avg_f1_score_ph
+f_d_avg_f1_score
+f_d_summaries</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="Implyloss.my_train.HLSTrain.maybe_save_metrics_dict">
+<code class="sig-name descname"><span class="pre">maybe_save_metrics_dict</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">run_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metrics_dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Implyloss/my_train.html#HLSTrain.maybe_save_metrics_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Implyloss.my_train.HLSTrain.maybe_save_metrics_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Func desc:
+save the metric if it is the best till now</p>
+<p>Input:
+self
+run_type
+metrics_dict</p>
+<p>Output:
+True or False denoting whether the current metric is saved or not</p>
+<p>Prints:
+The saved metric file</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="Implyloss.my_train.HLSTrain.report_f_d_perfs_to_tensorboard">
+<code class="sig-name descname"><span class="pre">report_f_d_perfs_to_tensorboard</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f_d_loss</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metrics_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">global_step</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Implyloss/my_train.html#HLSTrain.report_f_d_perfs_to_tensorboard"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Implyloss.my_train.HLSTrain.report_f_d_perfs_to_tensorboard" title="Permalink to this definition">¶</a></dt>
+<dd><p>Func Desc:
+report the f_d_performance to tensorboard</p>
+<p>Input:
+self
+f_d_loss
+metrics_dict
+global_step</p>
+<p>Output:</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="Implyloss.my_train.HLSTrain.save_metrics">
+<code class="sig-name descname"><span class="pre">save_metrics</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">run_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metrics_dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Implyloss/my_train.html#HLSTrain.save_metrics"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Implyloss.my_train.HLSTrain.save_metrics" title="Permalink to this definition">¶</a></dt>
+<dd><p>Func desc:
+save the metrics</p>
+<p>Input:
+self
+run_type
+metrics_dict</p>
+<p>Prints:
+The saved metric file</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="Implyloss.my_train.HLSTrain.train_f_on_d">
+<code class="sig-name descname"><span class="pre">train_f_on_d</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">datafeeder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_epochs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Implyloss/my_train.html#HLSTrain.train_f_on_d"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Implyloss.my_train.HLSTrain.train_f_on_d" title="Permalink to this definition">¶</a></dt>
+<dd><p>Func Desc:
+trains the f_network (classification network) on labelled data</p>
+<p>Input:
+self
+datafeeder - datafeeder object
+num_epochs - number of epochs for training</p>
+<p>Output:</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="Implyloss.my_train.HLSTrain.train_f_on_d_U">
+<code class="sig-name descname"><span class="pre">train_f_on_d_U</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">datafeeder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_epochs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loss_type</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Implyloss/my_train.html#HLSTrain.train_f_on_d_U"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Implyloss.my_train.HLSTrain.train_f_on_d_U" title="Permalink to this definition">¶</a></dt>
+<dd><p>Func Desc:
+trains the f_network (classification network) on labelled amd unlabelled data</p>
+<p>Input:
+self
+datafeeder - datafeeder object
+num_epochs - number of epochs for training
+loss_type - different available losses</p>
+<p>Output:</p>
+</dd></dl>
+
+</dd></dl>
+
 </div>
 <div class="section" id="module-Implyloss.my_utils">
 <span id="implyloss-utils"></span><h2>Implyloss Utils<a class="headerlink" href="#module-Implyloss.my_utils" title="Permalink to this headline">¶</a></h2>
