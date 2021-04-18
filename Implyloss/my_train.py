@@ -11,9 +11,8 @@ import pickle
 import sys,os
 from sklearn.metrics import precision_recall_fscore_support
 from snorkel.labeling import labeling_function
-# from snorkel.labeling import MajorityLabelVoter
-# from snorkel.labeling import LabelModel
-# from snorkel.labeling import MajorityLabelVoter
+from snorkel.labeling.model import MajorityLabelVoter
+from snorkel.labeling.model import LabelModel
 from sklearn.metrics import precision_recall_fscore_support
 # from snorkel_utils import conv_l_to_lsnork
 
@@ -235,8 +234,8 @@ class HLSTrain():
 		#     else:
 		#         print("LABEL MODEL NOT SAVED")
 		#         exit()
-		# if 'gcross' in self.config.mode or 'learn2reweight' in self.config.mode:
-		#     majority_model = MajorityLabelVoter(cardinality=self.hls.num_classes)
+		if 'gcross' in self.config.mode or 'learn2reweight' in self.config.mode:
+		    majority_model = MajorityLabelVoter(cardinality=self.hls.num_classes)
 
 		with sess.as_default():
 			print("Optimization started for f_d_U with %s loss!" % loss_type)
