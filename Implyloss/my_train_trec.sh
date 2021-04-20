@@ -9,7 +9,6 @@ mkdir -p $logdir # logs are dumped here
 # declare -a gamma_arr=(0.1)
 # declare -a lamda_arr=(0.1) # not actually used
 # declare -a model_id=(1 2 3 4 5) # (5 independent models were trained and numbers obtained were averaged)
-echo "Hello 1 1"
 
 # USE THIS FOR POSTERIOR REG.
 # declare -a arr=("pr_loss") # Posterior Reg. in Table2 Column2 (Question) 
@@ -23,7 +22,7 @@ echo "Hello 1 1"
 # declare -a lamda_arr=(0.1) # not actually used
 # declare -a model_id=(1 2 3 4 5 6 7 8 9 10)
    
-# USE THIS FOR L+Umaj and Nosie-Tolerant
+# USE THIS FOR L+Umaj and Noise-Tolerant
 # declare -a arr=("gcross") 
 # declare -a gamma_arr=(0.001)
 # declare -a lamda_arr=(0 0.9) # 0 for L+Umaj and 0.9 for Noise-tolerant in Table 2 Column2 (Question)

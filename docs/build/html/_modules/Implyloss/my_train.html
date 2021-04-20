@@ -148,8 +148,8 @@
            <div itemprop="articleBody">
             
   <h1>Source code for Implyloss.my_train</h1><div class="highlight"><pre>
-<span></span><span class="c1"># from hls_data_types import f_d, f_d_U</span>
-<span class="c1"># from utils import merge_dict_a_into_b</span>
+<span></span><span class="kn">from</span> <span class="nn">my_data_types</span> <span class="kn">import</span> <span class="n">f_d</span><span class="p">,</span> <span class="n">f_d_U</span>
+<span class="kn">from</span> <span class="nn">my_utils</span> <span class="kn">import</span> <span class="o">*</span>
 <span class="c1"># import metrics_utils</span>
 <span class="kn">import</span> <span class="nn">my_utils</span><span class="o">,</span> <span class="nn">my_data_types</span>
 <span class="kn">import</span> <span class="nn">json</span>
@@ -161,9 +161,8 @@
 <span class="kn">import</span> <span class="nn">sys</span><span class="o">,</span><span class="nn">os</span>
 <span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">precision_recall_fscore_support</span>
 <span class="kn">from</span> <span class="nn">snorkel.labeling</span> <span class="kn">import</span> <span class="n">labeling_function</span>
-<span class="c1"># from snorkel.labeling import MajorityLabelVoter</span>
-<span class="c1"># from snorkel.labeling import LabelModel</span>
-<span class="c1"># from snorkel.labeling import MajorityLabelVoter</span>
+<span class="kn">from</span> <span class="nn">snorkel.labeling.model</span> <span class="kn">import</span> <span class="n">MajorityLabelVoter</span>
+<span class="kn">from</span> <span class="nn">snorkel.labeling.model</span> <span class="kn">import</span> <span class="n">LabelModel</span>
 <span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">precision_recall_fscore_support</span>
 <span class="c1"># from snorkel_utils import conv_l_to_lsnork</span>
 
@@ -378,15 +377,15 @@
 		<span class="n">best_saver_f_d_U</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">hls</span><span class="o">.</span><span class="n">best_savers</span><span class="o">.</span><span class="n">get_best_saver</span><span class="p">(</span><span class="n">f_d_U</span><span class="p">)</span>
 		<span class="n">metrics_dict</span> <span class="o">=</span> <span class="p">{}</span> <span class="c1">#{&#39;config&#39;: self.config}</span>
 
-		<span class="c1"># if &#39;label_snorkel&#39; == self.config.mode or &#39;pure_snorkel&#39; == self.config.mode or &#39;gcross_snorkel&#39; == self.config.mode:</span>
-		<span class="c1">#     label_model = LabelModel(cardinality=self.hls.num_classes, verbose=True)</span>
-		<span class="c1">#     if os.path.isfile(os.path.join(self.config.data_dir,&quot;saved_label_model&quot;)):</span>
-		<span class="c1">#         label_model = label_model.load(os.path.join(self.config.data_dir,&quot;saved_label_model&quot;))</span>
-		<span class="c1">#     else:</span>
-		<span class="c1">#         print(&quot;LABEL MODEL NOT SAVED&quot;)</span>
-		<span class="c1">#         exit()</span>
-		<span class="c1"># if &#39;gcross&#39; in self.config.mode or &#39;learn2reweight&#39; in self.config.mode:</span>
-		<span class="c1">#     majority_model = MajorityLabelVoter(cardinality=self.hls.num_classes)</span>
+		<span class="k">if</span> <span class="s1">&#39;label_snorkel&#39;</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">mode</span> <span class="ow">or</span> <span class="s1">&#39;pure_snorkel&#39;</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">mode</span> <span class="ow">or</span> <span class="s1">&#39;gcross_snorkel&#39;</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">mode</span><span class="p">:</span>
+		    <span class="n">label_model</span> <span class="o">=</span> <span class="n">LabelModel</span><span class="p">(</span><span class="n">cardinality</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">hls</span><span class="o">.</span><span class="n">num_classes</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+		    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">data_dir</span><span class="p">,</span><span class="s2">&quot;saved_label_model&quot;</span><span class="p">)):</span>
+		        <span class="n">label_model</span> <span class="o">=</span> <span class="n">label_model</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">data_dir</span><span class="p">,</span><span class="s2">&quot;saved_label_model&quot;</span><span class="p">))</span>
+		    <span class="k">else</span><span class="p">:</span>
+		        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;LABEL MODEL NOT SAVED&quot;</span><span class="p">)</span>
+		        <span class="n">exit</span><span class="p">()</span>
+		<span class="k">if</span> <span class="s1">&#39;gcross&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">mode</span> <span class="ow">or</span> <span class="s1">&#39;learn2reweight&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">mode</span><span class="p">:</span>
+		    <span class="n">majority_model</span> <span class="o">=</span> <span class="n">MajorityLabelVoter</span><span class="p">(</span><span class="n">cardinality</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">hls</span><span class="o">.</span><span class="n">num_classes</span><span class="p">)</span>
 
 		<span class="k">with</span> <span class="n">sess</span><span class="o">.</span><span class="n">as_default</span><span class="p">():</span>
 			<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Optimization started for f_d_U with </span><span class="si">%s</span><span class="s2"> loss!&quot;</span> <span class="o">%</span> <span class="n">loss_type</span><span class="p">)</span>

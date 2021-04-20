@@ -227,13 +227,13 @@ class HLSTrain():
 		best_saver_f_d_U = self.hls.best_savers.get_best_saver(f_d_U)
 		metrics_dict = {} #{'config': self.config}
 
-		# if 'label_snorkel' == self.config.mode or 'pure_snorkel' == self.config.mode or 'gcross_snorkel' == self.config.mode:
-		#     label_model = LabelModel(cardinality=self.hls.num_classes, verbose=True)
-		#     if os.path.isfile(os.path.join(self.config.data_dir,"saved_label_model")):
-		#         label_model = label_model.load(os.path.join(self.config.data_dir,"saved_label_model"))
-		#     else:
-		#         print("LABEL MODEL NOT SAVED")
-		#         exit()
+		if 'label_snorkel' == self.config.mode or 'pure_snorkel' == self.config.mode or 'gcross_snorkel' == self.config.mode:
+		    label_model = LabelModel(cardinality=self.hls.num_classes, verbose=True)
+		    if os.path.isfile(os.path.join(self.config.data_dir,"saved_label_model")):
+		        label_model = label_model.load(os.path.join(self.config.data_dir,"saved_label_model"))
+		    else:
+		        print("LABEL MODEL NOT SAVED")
+		        exit()
 		if 'gcross' in self.config.mode or 'learn2reweight' in self.config.mode:
 		    majority_model = MajorityLabelVoter(cardinality=self.hls.num_classes)
 
