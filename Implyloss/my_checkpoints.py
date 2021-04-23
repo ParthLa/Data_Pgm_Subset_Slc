@@ -4,7 +4,7 @@ tf.disable_v2_behavior()
 import numpy as np
 import os
 
-from checkmate.my_checkmate import BestCheckpointSaver, get_best_checkpoint
+from my_checkmate import BestCheckpointSaver, get_best_checkpoint
 from my_data_types import train_modes
 from my_config import flags as config
 

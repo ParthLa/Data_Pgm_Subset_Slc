@@ -15,7 +15,7 @@ USE_JOINT_f_w=${12} #this flag should be True if you need to use output of rule 
 
 # DATA_DIR=../../data/TREC
 DATA_DIR=/home/parth/Desktop/SEM6/RnD/Learning-From-Rules/data/TREC
-
+echo "Hello 2 1"
 
 
 W_LAYERS="512,512"
@@ -48,5 +48,5 @@ python3 -u my_main.py \
   --U_pickle_name=$U_PICKLE_NAME \
   --gamma=$GAMMA \
   --lamda=$LAMDA \
-  --early_stopping_p=5 \
+  --early_stopping_p=20 \
   --use_joint_f_w=$USE_JOINT_f_w
