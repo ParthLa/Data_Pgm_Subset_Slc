@@ -10,9 +10,10 @@ from my_data_types import *
 import my_data_feeder_utils as utils
 
 class DataFeeder():
-    def __init__(self, d_pickle, U_pickle, validation_pickle,
-            out_dir='./',
-            config=None):
+    def __init__(self, d_pickle, U_pickle, validation_pickle, 
+            shuffle_batches, num_load_d, num_load_U, num_classes, 
+            f_d_class_sampling, min_rule_coverage, rule_classes, num_load_validation, 
+            f_d_batch_size, f_d_U_batch_size, test_w_batch_size, out_dir='./'):
         '''
         Func Desc:
         Initialize the object with the given parameter files
@@ -23,25 +24,24 @@ class DataFeeder():
         U_pickle - unlabelled data file
         validation_pickle - validation data file
         out_dir (Default = './') - output directory
-        config (Default = None) - config file
 
         Output:
         Void
         '''
         self.f_d_U_start = 0
-        self.shuffle_batches=config.shuffle_batches
+        self.shuffle_batches=shuffle_batches
         self.out_dir = out_dir
 
-        self.raw_d = utils.load_data(d_pickle, config.num_load_d)
-        self.raw_U = utils.load_data(U_pickle, config.num_load_U)
+        self.raw_d = utils.load_data(d_pickle, num_load_d)
+        self.raw_U = utils.load_data(U_pickle, num_load_U)
 
-        if config.num_classes is not None:
-            self.num_classes = config.num_classes
+        if num_classes is not None:
+            self.num_classes = num_classes
             assert self.num_classes >= np.max(self.raw_d.L) + 1
         else:
             self.num_classes = np.max(self.raw_d.L) + 1
 
-        self.f_d_class_sampling = config.f_d_class_sampling
+        self.f_d_class_sampling = f_d_class_sampling
         if self.f_d_class_sampling:
             assert len(self.f_d_class_sampling) == self.num_classes
         else:
@@ -54,7 +54,7 @@ class DataFeeder():
         self.num_rules = self.raw_d.l.shape[1]
 
         # If min coverage threshold is specified for rules then apply it
-        self.min_rule_coverage = config.min_rule_coverage
+        self.min_rule_coverage = min_rule_coverage
         self.num_rules_to_train = self.num_rules
         if self.min_rule_coverage > 0:
             self.satisfying_rules, self.not_satisfying_rules, \
@@ -76,7 +76,7 @@ class DataFeeder():
                         self.rule_map_old_to_new)
 
         # Determine rule classes from the truncated rule list
-        self.rule_classes = config.rule_classes 
+        self.rule_classes = rule_classes 
         if not self.rule_classes:
             self.rule_classes = utils.get_rule_classes(self.raw_d.l, self.num_classes)
 
@@ -92,7 +92,7 @@ class DataFeeder():
         self.f_d = self.convert_raw_d_to_f_d(self.raw_d, num_load=0)
 
         raw_test_data = utils.load_data(validation_pickle,
-                config.num_load_validation)
+                num_load_validation)
 
         self.test_f_x, self.test_f_labels, self.test_f_labels_one_hot, \
                 self.test_f_l, self.test_f_m, self.test_f_d, self.test_f_r  = \
@@ -116,9 +116,9 @@ class DataFeeder():
         print('test_w len: ', self.data_lens[test_w])
 
         self.batch_size = {
-                f_d: config.f_d_batch_size ,
-                f_d_U: config.f_d_U_batch_size,
-                test_w: config.test_w_batch_size,
+                f_d: f_d_batch_size ,
+                f_d_U: f_d_U_batch_size,
+                test_w: test_w_batch_size,
                 }
 
         self.data_store = {

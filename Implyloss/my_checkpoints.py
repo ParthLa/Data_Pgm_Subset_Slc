@@ -6,7 +6,13 @@ import os
 
 from my_checkmate import BestCheckpointSaver, get_best_checkpoint
 from my_data_types import train_modes
-from my_config import flags as config
+# from my_config import flags as config
+
+checkpoint_dir = "./checkpoint"
+if not os.path.exists(checkpoint_dir):
+	os.makedirs(checkpoint_dir)
+
+num_checkpoints = 1 # Number of checkpoints to keep around
 
 # Keeps only the most recently saved checkpoint
 #
@@ -439,9 +445,9 @@ class CheckpointsFactory:
 		Output:
 
 		'''
-		ckpt_dir = config.checkpoint_dir
+		ckpt_dir = checkpoint_dir
 		self.best_savers[mode] = BestCheckpoint(ckpt_dir, mode, sess,
-				config.num_checkpoints, tf.global_variables(), global_steps[mode])
+				num_checkpoints, tf.global_variables(), global_steps[mode])
 
 if __name__ == '__main__':
 	test_best_ckpt()

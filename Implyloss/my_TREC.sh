@@ -1,33 +1,36 @@
 #!/usr/bin/env bash
+logdir=logs/my_TREC
+mkdir -p $logdir # logs are dumped here
 
-OUTPUT_DIR=$1
-MODE=$2
-EPOCHS=$3
-LR=$4
-CKPT_LOAD_MODE=$5
-DROPOUT_KEEP_PROB=$6
-D_PICKLE_NAME=$7
-VALID_PICKLE_NAME=$8
-U_PICKLE_NAME=$9
-GAMMA=${10}
-LAMDA=${11}
-USE_JOINT_f_w=${12} #this flag should be True if you need to use output of rule network while doing inference (See eqn6 in the paper)
+MODE="implication" # "learn2reweight" / "implication" / "pr_loss" / "label_snorkel" / "gcross" / "gcross_snorkel" / "f_d" / "test_f" / "test_w" / "test_all"
+EPOCHS=4
+LR=0.0003
+CKPT_LOAD_MODE=mru
+DROPOUT_KEEP_PROB=0.8
+D_PICKLE_NAME="d_processed.p"
+VALID_PICKLE_NAME=validation_processed.p
+U_PICKLE_NAME="U_processed.p"
+GAMMA=0.1
+LAMDA=0.1
+USE_JOINT_f_w=False #this flag should be True if you need to use output of rule network while doing inference (See eqn6 in the paper)
+Q=1
+OUTPUT_DIR="$MODE"_"$GAMMA"_"$LAMDA"_"$Q"
 
 # DATA_DIR=../../data/TREC
 DATA_DIR=/home/parth/Desktop/SEM6/RnD/Learning-From-Rules/data/TREC
-echo "Hello 2 1"
+# echo "Hello 2 1"
 
 
 W_LAYERS="512,512"
 F_LAYERS="512,512"
 
-F_D_CLASS_SAMPLING=10,10,10,10,10,10 # while mixing d and U sets, oversample data from d 10 times
+F_D_CLASS_SAMPLING="10,10,10,10,10,10" # while mixing d and U sets, oversample data from d 10 times
                                      # this is because size of d is just 68
                                      # while size of U is ~ 4.6k
                                      # this is done so that in any batch there are enough instances from "d"
                                      # along with instances from U
 
-python3 -u my_main.py \
+python3 my_main.py \
   --output_dir="$DATA_DIR"/outputs/"$OUTPUT_DIR" \
   --run_mode=$MODE \
   --checkpoint_load_mode=$CKPT_LOAD_MODE \

@@ -1,0 +1,167 @@
+Loading from hoff  /home/parth/Desktop/SEM6/RnD/Learning-From-Rules/data/TREC/d_processed.p
+Loading from hoff  /home/parth/Desktop/SEM6/RnD/Learning-From-Rules/data/TREC/U_processed.p
+Rule classes:  [2, 1, 1, 4, 3, 2, 1, 3, 5, 4, 3, 2, 4, 1, 2, 5, 4, 1, 2, 4, 3, 1, 3, 2, 1, 1, 4, 4, 5, 1, 3, 5, 2, 1, 5, 1, 5, 5, 0, 5, 5, 1, 4, 2, 3, 2, 1, 3, 5, 1, 1, 3, 2, 1, 1, 5, 2, 3, 2, 5, 3, 3, 4, 5, 5, 4, 2, 0]
+length of covered U: 4637
+Size of d before oversampling:  68
+Size of U (covered) :  4637
+Size of d after oversampling:  680
+Size of d_U after combining:  5317
+Loading 68 elements from d
+num instances in d:  680
+Loading from hoff  /home/parth/Desktop/SEM6/RnD/Learning-From-Rules/data/TREC/validation_processed.p
+Setting value of d to 0 for test data
+test_w len:  476
+test_w len:  476
+Number of features:  1024
+Number of classes:  6
+Print num of rules to train:  68
+Print num of rules:  68
+
+
+
+[Errno 2] No such file or directory: './met_pickl/metrics_train_f_on_d.p'
+Did not find prev best metric for run type f_d. Setting to zero.
+Found prev best metric for run type f_d_U: 0.730
+best metrics dict:  {'f1_score_1': 0.7518796992481204, 'precision_1': 0.6993006993006993, 'recall_1': 0.8130081300813008, 'support_1': 123, 'f1_score': array([0.82352941, 0.7518797 , 0.56768559, 0.76237624, 0.82014388,
+       0.80272109]), 'precision': array([0.77777778, 0.6993007 , 0.55555556, 0.83695652, 0.87692308,
+       0.7972973 ]), 'recall': array([0.875     , 0.81300813, 0.58035714, 0.7       , 0.77027027,
+       0.80821918]), 'support': array([  8, 123, 112, 110,  74,  73]), 'avg_f1_score': 0.7547226519139499, 'avg_precision': 0.7573018214322561, 'avg_recall': 0.757809120215151, 'accuracy': 0.73, 'epoch': 6.0, 'f_d_global_step': 996}
+[
+    "<tf.Variable 'global_step:0' shape=() dtype=int64_ref>",
+    "<tf.Variable 'f_d_global_step:0' shape=() dtype=int32_ref>",
+    "<tf.Variable 'f_network/dense/kernel:0' shape=(1024, 512) dtype=float32_ref>",
+    "<tf.Variable 'f_network/dense/bias:0' shape=(512,) dtype=float32_ref>",
+    "<tf.Variable 'f_network/dense_1/kernel:0' shape=(512, 512) dtype=float32_ref>",
+    "<tf.Variable 'f_network/dense_1/bias:0' shape=(512,) dtype=float32_ref>",
+    "<tf.Variable 'f_network/dense_2/kernel:0' shape=(512, 6) dtype=float32_ref>",
+    "<tf.Variable 'f_network/dense_2/bias:0' shape=(6,) dtype=float32_ref>",
+    "<tf.Variable 'beta1_power:0' shape=() dtype=float32_ref>",
+    "<tf.Variable 'beta2_power:0' shape=() dtype=float32_ref>",
+    "<tf.Variable 'f_network/dense/kernel/f_d_Adam:0' shape=(1024, 512) dtype=float32_ref>",
+    "<tf.Variable 'f_network/dense/kernel/f_d_Adam_1:0' shape=(1024, 512) dtype=float32_ref>",
+    "<tf.Variable 'f_network/dense/bias/f_d_Adam:0' shape=(512,) dtype=float32_ref>",
+    "<tf.Variable 'f_network/dense/bias/f_d_Adam_1:0' shape=(512,) dtype=float32_ref>",
+    "<tf.Variable 'f_network/dense_1/kernel/f_d_Adam:0' shape=(512, 512) dtype=float32_ref>",
+    "<tf.Variable 'f_network/dense_1/kernel/f_d_Adam_1:0' shape=(512, 512) dtype=float32_ref>",
+    "<tf.Variable 'f_network/dense_1/bias/f_d_Adam:0' shape=(512,) dtype=float32_ref>",
+    "<tf.Variable 'f_network/dense_1/bias/f_d_Adam_1:0' shape=(512,) dtype=float32_ref>",
+    "<tf.Variable 'f_network/dense_2/kernel/f_d_Adam:0' shape=(512, 6) dtype=float32_ref>",
+    "<tf.Variable 'f_network/dense_2/kernel/f_d_Adam_1:0' shape=(512, 6) dtype=float32_ref>",
+    "<tf.Variable 'f_network/dense_2/bias/f_d_Adam:0' shape=(6,) dtype=float32_ref>",
+    "<tf.Variable 'f_network/dense_2/bias/f_d_Adam_1:0' shape=(6,) dtype=float32_ref>",
+    "<tf.Variable 'f_d_U_global_step:0' shape=() dtype=int32_ref>",
+    "<tf.Variable 'w_network/w_layer_0/kernel:0' shape=(1092, 512) dtype=float32_ref>",
+    "<tf.Variable 'w_network/w_layer_0/bias:0' shape=(512,) dtype=float32_ref>",
+    "<tf.Variable 'w_network/w_layer_1/kernel:0' shape=(512, 512) dtype=float32_ref>",
+    "<tf.Variable 'w_network/w_layer_1/bias:0' shape=(512,) dtype=float32_ref>",
+    "<tf.Variable 'w_network/w_linear_layer/kernel:0' shape=(512, 1) dtype=float32_ref>",
+    "<tf.Variable 'w_network/w_linear_layer/bias:0' shape=(1,) dtype=float32_ref>",
+    "<tf.Variable 'beta1_power_1:0' shape=() dtype=float32_ref>",
+    "<tf.Variable 'beta2_power_1:0' shape=() dtype=float32_ref>",
+    "<tf.Variable 'f_network/dense/kernel/f_d_U_Adam:0' shape=(1024, 512) dtype=float32_ref>",
+    "<tf.Variable 'f_network/dense/kernel/f_d_U_Adam_1:0' shape=(1024, 512) dtype=float32_ref>",
+    "<tf.Variable 'f_network/dense/bias/f_d_U_Adam:0' shape=(512,) dtype=float32_ref>",
+    "<tf.Variable 'f_network/dense/bias/f_d_U_Adam_1:0' shape=(512,) dtype=float32_ref>",
+    "<tf.Variable 'f_network/dense_1/kernel/f_d_U_Adam:0' shape=(512, 512) dtype=float32_ref>",
+    "<tf.Variable 'f_network/dense_1/kernel/f_d_U_Adam_1:0' shape=(512, 512) dtype=float32_ref>",
+    "<tf.Variable 'f_network/dense_1/bias/f_d_U_Adam:0' shape=(512,) dtype=float32_ref>",
+    "<tf.Variable 'f_network/dense_1/bias/f_d_U_Adam_1:0' shape=(512,) dtype=float32_ref>",
+    "<tf.Variable 'f_network/dense_2/kernel/f_d_U_Adam:0' shape=(512, 6) dtype=float32_ref>",
+    "<tf.Variable 'f_network/dense_2/kernel/f_d_U_Adam_1:0' shape=(512, 6) dtype=float32_ref>",
+    "<tf.Variable 'f_network/dense_2/bias/f_d_U_Adam:0' shape=(6,) dtype=float32_ref>",
+    "<tf.Variable 'f_network/dense_2/bias/f_d_U_Adam_1:0' shape=(6,) dtype=float32_ref>",
+    "<tf.Variable 'w_network/w_layer_0/kernel/f_d_U_Adam:0' shape=(1092, 512) dtype=float32_ref>",
+    "<tf.Variable 'w_network/w_layer_0/kernel/f_d_U_Adam_1:0' shape=(1092, 512) dtype=float32_ref>",
+    "<tf.Variable 'w_network/w_layer_0/bias/f_d_U_Adam:0' shape=(512,) dtype=float32_ref>",
+    "<tf.Variable 'w_network/w_layer_0/bias/f_d_U_Adam_1:0' shape=(512,) dtype=float32_ref>",
+    "<tf.Variable 'w_network/w_layer_1/kernel/f_d_U_Adam:0' shape=(512, 512) dtype=float32_ref>",
+    "<tf.Variable 'w_network/w_layer_1/kernel/f_d_U_Adam_1:0' shape=(512, 512) dtype=float32_ref>",
+    "<tf.Variable 'w_network/w_layer_1/bias/f_d_U_Adam:0' shape=(512,) dtype=float32_ref>",
+    "<tf.Variable 'w_network/w_layer_1/bias/f_d_U_Adam_1:0' shape=(512,) dtype=float32_ref>",
+    "<tf.Variable 'w_network/w_linear_layer/kernel/f_d_U_Adam:0' shape=(512, 1) dtype=float32_ref>",
+    "<tf.Variable 'w_network/w_linear_layer/kernel/f_d_U_Adam_1:0' shape=(512, 1) dtype=float32_ref>",
+    "<tf.Variable 'w_network/w_linear_layer/bias/f_d_U_Adam:0' shape=(1,) dtype=float32_ref>",
+    "<tf.Variable 'w_network/w_linear_layer/bias/f_d_U_Adam_1:0' shape=(1,) dtype=float32_ref>"
+]
+Restoring checkpoint from path:  ./checkpoint/hls-model-667
+Run mode is implication
+begin Implication loss training
+num_instances:  5317
+batch_size:  32
+total_batch:  166
+remaining:  5
+total_batch:  166
+Optimization started for f_d_U with implication loss!
+Batch size: 32!
+Batches per epoch : 166!
+Number of epochs: 4!
+
+========== epoch : 0 ============
+
+cost: 0.010162013541442992
+
+patience: 0
+
+
+metrics_dict:  {'f1_score_1': 0.7136929460580914, 'precision_1': 0.7288135593220338, 'recall_1': 0.6991869918699187, 'support_1': 123, 'f1_score': array([0.737, 0.714, 0.589, 0.724, 0.847, 0.763]), 'precision': array([0.636, 0.729, 0.521, 0.893, 0.921, 0.701]), 'recall': array([0.875, 0.699, 0.679, 0.609, 0.784, 0.836]), 'support': array([  8, 123, 112, 110,  74,  73]), 'avg_f1_score': 0.7288703318224053, 'avg_precision': 0.7334738033577932, 'avg_recall': 0.7468749252787008, 'accuracy': 0.71, 'epoch': 13.0, 'f_d_global_step': 2158}
+
+Reporting f_d metrics to tensorboard
+Not saving metrics dict. Best metric value is 0.73 Current is: 0.71
+
+Saved MRU checkpoint to path:  ./checkpoint/hls-model-166
+
+No new best checkpoint. Did not save a new best checkpoint. Last checkpointed file:  ./checkpoint/f_d_U/best.ckpt-996
+
+
+========== epoch : 1 ============
+
+cost: 0.02081942848774608
+
+patience: 1
+
+
+metrics_dict:  {'f1_score_1': 0.7219917012448133, 'precision_1': 0.7372881355932204, 'recall_1': 0.7073170731707317, 'support_1': 123, 'f1_score': array([0.778, 0.722, 0.595, 0.708, 0.815, 0.805]), 'precision': array([0.700, 0.737, 0.497, 0.926, 0.902, 0.789]), 'recall': array([0.875, 0.707, 0.741, 0.573, 0.743, 0.822]), 'support': array([  8, 123, 112, 110,  74,  73]), 'avg_f1_score': 0.7371334447910928, 'avg_precision': 0.7586462900542146, 'avg_recall': 0.7435461376553091, 'accuracy': 0.71, 'epoch': 14.0, 'f_d_global_step': 2324}
+
+Reporting f_d metrics to tensorboard
+Not saving metrics dict. Best metric value is 0.73 Current is: 0.71
+
+Saved MRU checkpoint to path:  ./checkpoint/hls-model-333
+
+No new best checkpoint. Did not save a new best checkpoint. Last checkpointed file:  ./checkpoint/f_d_U/best.ckpt-996
+
+
+========== epoch : 2 ============
+
+cost: 0.004577579754708032
+
+patience: 2
+
+
+metrics_dict:  {'f1_score_1': 0.7083333333333334, 'precision_1': 0.7264957264957265, 'recall_1': 0.6910569105691057, 'support_1': 123, 'f1_score': array([0.800, 0.708, 0.604, 0.754, 0.855, 0.780]), 'precision': array([0.667, 0.726, 0.556, 0.889, 0.873, 0.721]), 'recall': array([1.000, 0.691, 0.661, 0.655, 0.838, 0.849]), 'support': array([  8, 123, 112, 110,  74,  73]), 'avg_f1_score': 0.7502313825311094, 'avg_precision': 0.7387686547787915, 'avg_recall': 0.7822449261933057, 'accuracy': 0.726, 'epoch': 15.0, 'f_d_global_step': 2490}
+
+Reporting f_d metrics to tensorboard
+Not saving metrics dict. Best metric value is 0.73 Current is: 0.726
+
+Saved MRU checkpoint to path:  ./checkpoint/hls-model-500
+
+No new best checkpoint. Did not save a new best checkpoint. Last checkpointed file:  ./checkpoint/f_d_U/best.ckpt-996
+
+
+========== epoch : 3 ============
+
+cost: 0.00405400440182205
+
+patience: 3
+
+
+metrics_dict:  {'f1_score_1': 0.7083333333333334, 'precision_1': 0.7264957264957265, 'recall_1': 0.6910569105691057, 'support_1': 123, 'f1_score': array([0.778, 0.708, 0.585, 0.732, 0.849, 0.775]), 'precision': array([0.700, 0.726, 0.514, 0.918, 0.908, 0.713]), 'recall': array([0.875, 0.691, 0.679, 0.609, 0.797, 0.849]), 'support': array([  8, 123, 112, 110,  74,  73]), 'avg_f1_score': 0.737814632699053, 'avg_precision': 0.7463589075067582, 'avg_recall': 0.7500552690036485, 'accuracy': 0.712, 'epoch': 16.0, 'f_d_global_step': 2656}
+
+Reporting f_d metrics to tensorboard
+Not saving metrics dict. Best metric value is 0.73 Current is: 0.712
+
+Saved MRU checkpoint to path:  ./checkpoint/hls-model-667
+
+No new best checkpoint. Did not save a new best checkpoint. Last checkpointed file:  ./checkpoint/f_d_U/best.ckpt-996
+
+Optimization Finished for f_d_U!
+ Implication loss training end

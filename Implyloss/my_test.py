@@ -14,7 +14,7 @@ class HLSTest():
     Class Desc:
     This Class is designed to test the HLS model and its accuracy and precision obtained on the validation and test datasets
     '''
-    def __init__(self, hls, config):
+    def __init__(self, hls):
         '''
         Func Desc:
         Initializes the class member variables using the arguments provided
@@ -22,14 +22,12 @@ class HLSTest():
         Input:
         self
         hls - the hls model
-        config
 
         Sets:
         hls
-        config
         '''
         self.hls = hls
-        self.config = config
+        # self.config = config
 
     def maybe_save_predictions(self, save_filename, x, l, m, preds, d):
         '''
