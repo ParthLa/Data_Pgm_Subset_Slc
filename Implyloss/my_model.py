@@ -60,7 +60,6 @@ class HighLevelSupervisionNetwork:
 		self.lamda = lamda
 		self.raw_d_x = raw_d_x
 		self.raw_d_L = raw_d_L
-		# self.config = config
 		self.rule_classes_list = rule_classes
 		self.rule_classes = tf.convert_to_tensor(rule_classes)
 		self.num_features = num_features
@@ -126,7 +125,7 @@ class HighLevelSupervisionNetwork:
 	def parse_params(self, f_d_epochs, f_d_U_epochs, f_d_adam_lr, f_d_U_adam_lr):
 		'''
 		Func Desc:
-		Parses the parameters present in the config file
+		Parses the given parameters 
 
 		Input:
 		self 

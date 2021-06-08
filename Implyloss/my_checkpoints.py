@@ -6,8 +6,6 @@ import os
 
 from my_checkmate import BestCheckpointSaver, get_best_checkpoint
 from my_data_types import train_modes
-# from my_config import flags as config
-
 checkpoint_dir = "./checkpoint"
 if not os.path.exists(checkpoint_dir):
 	os.makedirs(checkpoint_dir)

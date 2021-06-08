@@ -11,7 +11,6 @@
 from my_data_feeders import DataFeeder
 
 from my_model import HighLevelSupervisionNetwork
-# from my_config import flags as config
 import my_networks
 
 import numpy as np
@@ -40,7 +39,6 @@ if not os.path.exists(tensorboard_dir):
 
 checkpoint_load_mode = 'mru' # Which kind of checkpoint to restore from. Possible options are mru: Most recently saved checkpoint. Use this to continue a run f_d, f_d_U: Use these to load the best checkpoint from these runs 
 d_pickle = data_dir+"/d_processed.p"
-# data_dir =  './' 
 dropout_keep_prob =  0.8
 early_stopping_p = 20 # early stopping patience (in epochs)
 f_d_adam_lr =  0.0003 # default = 0.01
@@ -84,7 +82,6 @@ if __name__ == '__main__':
     if mode not in ['learn2reweight', 'implication', 'f_d', 'pr_loss', 'gcross',  'label_snorkel', 'pure_snorkel', 'gcross_snorkel', 'test_f', 'test_w', 'test_all']:
         raise ValueError('Invalid run mode ' + mode)
 
-    # what is config exactly here ?
     data_feeder = DataFeeder(d_pickle, 
                              U_pickle, 
                              validation_pickle,
@@ -99,8 +96,7 @@ if __name__ == '__main__':
                              f_d_batch_size, 
                              f_d_U_batch_size, 
                              test_w_batch_size,
-                             out_dir=output_dir)#,
-                             # config=config)
+                             out_dir=output_dir)
 
     num_features, num_classes, num_rules, num_rules_to_train = data_feeder.get_features_classes_rules()
     print("Number of features: ", num_features)
@@ -142,7 +138,6 @@ if __name__ == '__main__':
     float_formatter = lambda x: "%.3f" % x
     np.set_printoptions(formatter={'float_kind':float_formatter})
 
-    # mode = config.mode
     print('Run mode is ' + mode)
     if mode == 'f_d':
         print('training f on d')
